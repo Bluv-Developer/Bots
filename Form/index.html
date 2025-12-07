@@ -62,6 +62,7 @@
             box-shadow: 0 40px 80px rgba(0,0,0,0.6);
             display: flex;
             overflow: hidden;
+            position: relative;
             animation: appEntry 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
@@ -73,6 +74,7 @@
             display: flex; flex-direction: column;
             border-right: 1px solid var(--glass-border);
             position: relative;
+            transition: opacity 0.5s ease;
         }
 
         .wizard-header {
@@ -202,6 +204,7 @@
             border-left: 1px solid var(--glass-border);
             display: flex; flex-direction: column; justify-content: center; padding: 40px;
             position: relative;
+            transition: opacity 0.5s ease;
         }
         .preview-bg-pattern {
             position: absolute; top:0; left:0; width:100%; height:100%;
@@ -255,6 +258,48 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.3s ease;
         }
 
+        /* --- SUCCESS VIEW (DASHBOARD) --- */
+        .success-view {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(5, 5, 5, 0.95); z-index: 50;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; animation: fadeInSuccess 0.5s ease forwards;
+        }
+        @keyframes fadeInSuccess { from { opacity: 0; } to { opacity: 1; } }
+
+        .sv-header { text-align: center; margin-bottom: 40px; }
+        .sv-header h1 { font-size: 3rem; color: var(--success); text-shadow: 0 0 20px rgba(0, 204, 102, 0.4); margin-bottom: 10px; }
+        .sv-header p { color: #888; font-size: 1.1rem; }
+
+        .sv-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+            width: 100%; max-width: 1100px; margin-bottom: 30px;
+        }
+        
+        .sv-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; padding: 25px; text-align: center;
+            transition: 0.3s;
+        }
+        .sv-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.05); }
+        
+        .sv-label { font-size: 0.8rem; text-transform: uppercase; color: #666; letter-spacing: 1px; margin-bottom: 10px; }
+        .sv-value { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: white; font-weight: 700; word-break: break-all; }
+        .sv-value.secure { color: var(--accent); text-shadow: 0 0 10px rgba(88, 101, 242, 0.3); }
+
+        .summary-box {
+            background: rgba(20, 20, 25, 0.5); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px; padding: 25px; width: 100%; max-width: 1100px;
+            color: #ccc; font-size: 0.95rem; line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .summary-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+        .summary-row:last-child { border: none; }
+        .s-key { font-weight: 600; color: #888; }
+        .s-val { color: white; }
+
+        .sv-actions { display: flex; gap: 20px; }
+
         /* Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -273,6 +318,7 @@
             .app-container { flex-direction: column; height: 100vh; width: 100%; border-radius: 0; border: none; }
             .preview-section { display: none; }
             .wizard-section { border-right: none; }
+            .sv-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -280,8 +326,50 @@
 
     <div class="app-container">
         
+        <!-- SUCCESS VIEW -->
+        <div id="success-view" class="success-view">
+            <div class="sv-header">
+                <h1><i class="fa-solid fa-check-circle"></i> Request Confirmed</h1>
+                <p>Your bot configuration has been securely transmitted to Bluv.</p>
+            </div>
+
+            <!-- Generated IDs -->
+            <div class="sv-grid">
+                <div class="sv-card">
+                    <div class="sv-label">Order ID</div>
+                    <div class="sv-value" id="disp-orderid">Loading...</div>
+                </div>
+                <div class="sv-card">
+                    <div class="sv-label">BSID (Secret)</div>
+                    <div class="sv-value secure" id="disp-bsid">Loading...</div>
+                </div>
+                <div class="sv-card">
+                    <div class="sv-label">Public Release Key</div>
+                    <div class="sv-value" id="disp-pubkey">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary-box">
+                <div class="summary-row"><span class="s-key">Client:</span> <span class="s-val" id="sum-user">User</span></div>
+                <div class="summary-row"><span class="s-key">Bot Name:</span> <span class="s-val" id="sum-bot">Bot</span></div>
+                <div class="summary-row"><span class="s-key">Type:</span> <span class="s-val" id="sum-type">Type</span></div>
+                <div class="summary-row"><span class="s-key">Target Server:</span> <span class="s-val" id="sum-server">Server</span></div>
+                <div class="summary-row"><span class="s-key">Deadline:</span> <span class="s-val" id="sum-date">None</span></div>
+            </div>
+
+            <div class="sv-actions">
+                <button class="btn-ghost" onclick="editRequest()">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit & Resubmit
+                </button>
+                <button class="btn-main" onclick="location.reload()">
+                    <i class="fa-solid fa-power-off"></i> Close & Reset
+                </button>
+            </div>
+        </div>
+
         <!-- LEFT WIZARD -->
-        <div class="wizard-section">
+        <div class="wizard-section" id="wizard-section">
             <div class="wizard-header">
                 <div class="brand">
                     <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png" alt="Bluv Logo" class="brand-logo-img">
@@ -474,7 +562,7 @@
         </div>
 
         <!-- RIGHT LIVE PREVIEW -->
-        <div class="preview-section">
+        <div class="preview-section" id="preview-section">
             <div class="preview-bg-pattern"></div>
             <div class="preview-header">
                 <div class="live-dot"></div> Live Preview
@@ -544,6 +632,16 @@
         // Init: Add one command row
         window.onload = () => { addCommandRow(); };
 
+        // --- ID Generator ---
+        function generateID(prefix) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No O, 0, I, 1 to avoid confusion
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return `${prefix}-${result}`;
+        }
+
         // --- COMMAND BUILDER LOGIC ---
         function addCommandRow() {
             const container = document.getElementById('cmdContainer');
@@ -560,7 +658,6 @@
                 <div class="remove-cmd" onclick="removeCommandRow('${id}')"><i class="fa-solid fa-trash"></i></div>
             `;
             container.appendChild(div);
-            // Scroll to new input
             div.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
@@ -585,11 +682,9 @@
         // --- PREVIEW ANIMATION ---
         let typingTimer;
         function triggerTyping() {
-            // Update Text
             const user = document.getElementById('username').value || "User";
             document.getElementById('prev-user').innerText = user;
 
-            // Show Typing Indicator
             const typing = document.getElementById('typingIndicator');
             typing.style.opacity = '1';
             
@@ -634,7 +729,6 @@
             
             document.getElementById('scrollArea').scrollTop = 0;
 
-            // Buttons
             document.getElementById('backBtn').style.visibility = currentStep === 1 ? 'hidden' : 'visible';
             const next = document.getElementById('nextBtn');
             next.innerText = currentStep === totalSteps ? 'Submit Request' : 'Next Step';
@@ -643,7 +737,6 @@
 
         function validateStep() {
             const panel = document.getElementById(`step-${currentStep}`);
-            // Check standard inputs
             const inputs = panel.querySelectorAll('input[required]');
             let valid = true;
             inputs.forEach(i => {
@@ -653,13 +746,10 @@
                     setTimeout(() => i.style.borderColor = 'rgba(255,255,255,0.1)', 1500);
                 }
             });
-            
-            // Check hidden inputs for cards
             const hidden = panel.querySelectorAll('input[type="hidden"][required]');
             hidden.forEach(h => {
-                if(!h.value) valid = false; // Add visual feedback for cards if needed
+                if(!h.value) valid = false;
             });
-
             return valid;
         }
 
@@ -699,6 +789,11 @@
             nextBtn.innerText = "Transmitting...";
             nextBtn.disabled = true;
 
+            // Generate IDs
+            const orderID = generateID('ORD');
+            const bsid = generateID('BSID');
+            const pubKey = generateID('PUB');
+
             const commandList = getFormattedCommands();
 
             const d = {
@@ -723,13 +818,14 @@
                     color: parseInt(d.color.replace("#",""), 16),
                     thumbnail: { url: document.getElementById('avatar').value },
                     fields: [
+                        { name: "🔑 Secure IDs", value: `**Order ID:** \`${orderID}\`\n**BSID:** ||\`${bsid}\`||\n**Public Key:** \`${pubKey}\`` },
                         { name: "👤 User Profile", value: `**Tag:** \`${d.user}\`\n**ID:** \`${d.userid}\`\n**Via:** ${d.contact}\n**Timezone:** ${d.tz}` },
                         { name: "🤖 Bot Configuration", value: `**Name:** ${d.bot}\n**Type:** ${d.cmdpref}\n**APIs:** ${d.apis || "None"}` },
                         { name: "📜 Command Manifest", value: commandList.substring(0, 1024) },
                         { name: "🌍 Deployment", value: `**Server:** ${d.server}\n**Invite:** [Join Server](${d.invite})\n**Deadline:** ${d.deadline}` },
                         { name: "✍️ Authorization", value: `Signed: **${d.sig}**` }
                     ],
-                    footer: { text: "Bluv Dev System" },
+                    footer: { text: `Order: ${orderID}` },
                     timestamp: new Date().toISOString()
                 }]
             };
@@ -739,13 +835,54 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(() => {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                alert("Request Sent Successfully! Check your DMs or Ticket soon.");
-                location.reload();
+                // Show Success Dashboard
+                document.getElementById('wizard-section').style.opacity = '0';
+                document.getElementById('preview-section').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('wizard-section').style.display = 'none';
+                    document.getElementById('preview-section').style.display = 'none';
+                    const sv = document.getElementById('success-view');
+                    sv.style.display = 'flex';
+                    
+                    // Populate Success Data
+                    document.getElementById('disp-orderid').innerText = orderID;
+                    document.getElementById('disp-bsid').innerText = bsid;
+                    document.getElementById('disp-pubkey').innerText = pubKey;
+                    
+                    document.getElementById('sum-user').innerText = d.user;
+                    document.getElementById('sum-bot').innerText = d.bot;
+                    document.getElementById('sum-type').innerText = d.cmdpref;
+                    document.getElementById('sum-server').innerText = d.server;
+                    document.getElementById('sum-date').innerText = d.deadline;
+
+                    confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+                }, 500);
+
             }).catch(e => {
                 alert("Error sending: " + e);
                 nextBtn.disabled = false;
+                nextBtn.innerText = "Submit Request";
             });
+        }
+
+        function editRequest() {
+            const sv = document.getElementById('success-view');
+            sv.style.display = 'none';
+            
+            const wiz = document.getElementById('wizard-section');
+            const prev = document.getElementById('preview-section');
+            
+            wiz.style.display = 'flex';
+            prev.style.display = 'flex';
+            
+            setTimeout(() => {
+                wiz.style.opacity = '1';
+                prev.style.opacity = '1';
+            }, 50);
+
+            const nextBtn = document.getElementById('nextBtn');
+            nextBtn.disabled = false;
+            nextBtn.innerText = "Submit Request";
         }
     </script>
 </body>
