@@ -1,689 +1,529 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluv Developer > Bot Form</title>
-    <!-- Favicon -->
-    <link rel="icon" href="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        bluv: {
-                            500: '#5865F2',
-                            600: '#4752C4',
-                        }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out forwards',
-                        'slide-up': 'slideUp 0.5s ease-out forwards',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #0f1115;
-            background-image: radial-gradient(circle at 50% 100%, rgba(88, 101, 242, 0.25) 0%, rgba(15, 17, 21, 0) 60%);
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: #e5e7eb;
-            min-height: 100vh;
-        }
+import React, { useState, useEffect } from 'react';
+import { 
+  User, 
+  Bot, 
+  Server, 
+  FileText, 
+  ChevronRight, 
+  ChevronLeft, 
+  Check, 
+  Copy, 
+  Send,
+  MessageSquare,
+  Shield,
+  Zap,
+  Globe
+} from 'lucide-react';
 
-        .glass-panel {
-            background: rgba(22, 24, 29, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-        }
+export default function BluvForm() {
+  const [step, setStep] = useState(1);
+  const [submitted, setSubmitted] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
-        .input-field {
-            background-color: rgba(10, 12, 16, 0.6);
-            border: 1px solid #2d3035;
-            transition: all 0.2s ease;
-        }
-        .input-field:focus {
-            border-color: #5865F2;
-            box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
-            outline: none;
-            background-color: rgba(10, 12, 16, 0.9);
-        }
+  // Form State
+  const [formData, setFormData] = useState({
+    // Section 1: User Profile
+    discordUsername: '',
+    discordId: '',
+    nickname: '',
+    contactMethod: '',
+    referralSource: '',
+    timezone: '',
+    extraInfo: '',
 
-        .custom-checkbox:checked {
-            background-color: #5865F2;
-            border-color: #5865F2;
-        }
+    // Section 2: Bot Specs
+    botName: '',
+    botAvatar: '',
+    commandPref: 'Slash Commands (/help)',
+    category: '',
+    commandList: '',
+    botStatus: '',
+    themeColor: '#3b82f6',
+    hosting: 'Yes, manage it for me',
+    adminRoles: '',
+    logChannel: '',
 
-        /* Step transition styles */
-        .step-content {
-            display: none;
-        }
-        .step-content.active {
-            display: block;
-            animation: slideUp 0.4s ease-out;
-        }
+    // Section 3: Target Server
+    serverName: '',
+    serverInvite: '',
+    serverId: '',
+    memberCount: '',
+    primaryLanguage: 'English',
+    botPermissions: '',
+    nsfw: false,
+    conflicts: '',
 
-        /* Progress Bar */
-        .progress-step {
-            transition: all 0.3s ease;
-        }
-        .progress-step.active {
-            background-color: #5865F2;
-            color: white;
-            border-color: #5865F2;
-        }
-        
-        /* Command Card Styling */
-        .command-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s;
-        }
-        .command-card:hover {
-            border-color: rgba(88, 101, 242, 0.5);
-        }
+    // Section 4: TOS
+    agreeTOS: false,
+    agreeUptime: false,
+    agreeAbuse: false,
+    agreeOwnership: false,
+    agreeData: false,
+    agreeTermination: false,
+    signature: '',
+    date: new Date().toISOString().split('T')[0]
+  });
 
-        /* Success Screen */
-        #successScreen {
-            display: none;
-        }
-    </style>
-</head>
-<body class="flex flex-col items-center justify-center p-4 selection:bg-bluv-500 selection:text-white">
+  // Handle Input Changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
-    <!-- Header / Breadcrumb (Hidden on Success) -->
-    <header id="mainHeader" class="w-full max-w-4xl mb-8 flex flex-col items-center text-center pt-8 animate-fade-in">
-        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Logo" class="w-20 h-20 mb-4 drop-shadow-[0_0_15px_rgba(88,101,242,0.5)]">
-        
-        <div class="flex items-center gap-2 text-gray-500 text-sm font-semibold tracking-wide uppercase mb-2">
-            <span class="text-blue-400">Bluv Developer</span>
-            <i class="fa-solid fa-chevron-right text-xs"></i>
-            <span class="text-white">Bot Form</span>
-        </div>
-        
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
-            Project Intake
-        </h1>
-        <p class="text-gray-400">Let's build your ideal Discord bot.</p>
-    </header>
+  // Step Navigation
+  const nextStep = () => {
+    setAnimate(true);
+    setTimeout(() => {
+      setStep(prev => prev + 1);
+      setAnimate(false);
+    }, 300);
+    window.scrollTo(0, 0);
+  };
 
-    <!-- Progress Indicator (Hidden on Success) -->
-    <div id="progressContainer" class="w-full max-w-4xl mb-8 px-4 relative">
-        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-800 -z-10 rounded"></div>
-        <div class="absolute top-1/2 left-0 h-1 bg-blue-500 -z-10 rounded transition-all duration-300" id="progressBar" style="width: 0%"></div>
-        
-        <div class="flex justify-between items-center w-full">
-            <div class="flex flex-col items-center gap-2">
-                <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500 active" id="ind1">1</div>
-                <span class="text-xs text-gray-400 font-medium hidden md:block">Profile</span>
-            </div>
-             <div class="flex flex-col items-center gap-2">
-                <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind2">2</div>
-                <span class="text-xs text-gray-400 font-medium hidden md:block">Specs</span>
-            </div>
-             <div class="flex flex-col items-center gap-2">
-                <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind3">3</div>
-                <span class="text-xs text-gray-400 font-medium hidden md:block">Server</span>
-            </div>
-             <div class="flex flex-col items-center gap-2">
-                <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind4">4</div>
-                <span class="text-xs text-gray-400 font-medium hidden md:block">TOS</span>
-            </div>
-        </div>
+  const prevStep = () => {
+    setAnimate(true);
+    setTimeout(() => {
+      setStep(prev => prev - 1);
+      setAnimate(false);
+    }, 300);
+    window.scrollTo(0, 0);
+  };
+
+  // Generate the Final Report
+  const generateReport = () => {
+    return `
+\`\`\`md
+# 🤖 Bluv Developer Bot Request
+
+## 👤 Section 1: User Profile
+* **Discord Username:** ${formData.discordUsername}
+* **Discord ID:** ${formData.discordId}
+* **Nickname:** ${formData.nickname}
+* **Contact Method:** ${formData.contactMethod}
+* **Found Via:** ${formData.referralSource}
+* **Timezone:** ${formData.timezone}
+* **Extra Info:** ${formData.extraInfo || "N/A"}
+
+## 🤖 Section 2: Bot Specifications
+* **Bot Name:** ${formData.botName}
+* **Avatar URL:** ${formData.botAvatar || "Default"}
+* **Command Type:** ${formData.commandPref}
+* **Category:** ${formData.category}
+* **Status Text:** ${formData.botStatus}
+* **Theme Color:** ${formData.themeColor}
+* **Hosting:** ${formData.hosting}
+* **Admin Roles:** ${formData.adminRoles}
+* **Log Channel:** ${formData.logChannel || "None"}
+
+### Command List:
+${formData.commandList}
+
+## 🏠 Section 3: Target Server
+* **Server Name:** ${formData.serverName}
+* **Invite:** ${formData.serverInvite}
+* **Server ID:** ${formData.serverId}
+* **Members:** ${formData.memberCount}
+* **Language:** ${formData.primaryLanguage}
+* **Permissions:** ${formData.botPermissions}
+* **NSFW:** ${formData.nsfw ? "Yes" : "No"}
+* **Conflicts:** ${formData.conflicts || "None"}
+
+## 📜 Section 4: Agreement
+* **TOS Compliant:** ${formData.agreeTOS ? "Yes" : "NO"}
+* **Uptime Accepted:** ${formData.agreeUptime ? "Yes" : "NO"}
+* **Abuse Policy:** ${formData.agreeAbuse ? "Yes" : "NO"}
+* **Ownership:** ${formData.agreeOwnership ? "Yes" : "NO"}
+* **Data Consent:** ${formData.agreeData ? "Yes" : "NO"}
+* **Termination:** ${formData.agreeTermination ? "Yes" : "NO"}
+
+**Signed by:** ${formData.signature}
+**Date:** ${formData.date}
+\`\`\`
+    `.trim();
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generateReport());
+    alert("Form copied to clipboard! Please DM this to Bluv Developer.");
+  };
+
+  // Render Helpers
+  const InputField = ({ label, name, placeholder, type = "text", required = false, icon: Icon }) => (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-slate-400 mb-1">
+        {label} {required && <span className="text-blue-500">*</span>}
+      </label>
+      <div className="relative">
+        {Icon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Icon className="h-5 w-5 text-slate-500" />
+          </div>
+        )}
+        <input
+          type={type}
+          name={name}
+          value={formData[name]}
+          onChange={handleChange}
+          placeholder={placeholder}
+          className={`w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 ${Icon ? 'pl-10' : 'pl-4'} pr-4 text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-600`}
+          required={required}
+        />
+      </div>
     </div>
+  );
 
-    <!-- Main Form Container -->
-    <main id="formMain" class="w-full max-w-4xl relative pb-24">
-        <form id="botForm" onsubmit="return false;">
-            
-            <!-- STEP 1: User Profile -->
-            <div id="step1" class="step-content active">
-                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-blue-500/10 text-blue-400 p-2 rounded-lg"><i class="fa-solid fa-user"></i></span>
-                        <h2 class="text-2xl font-bold text-white">Who are you?</h2>
+  const TextArea = ({ label, name, placeholder, rows = 3, required = false }) => (
+    <div className="mb-4">
+      <label className="block text-sm font-medium text-slate-400 mb-1">
+        {label} {required && <span className="text-blue-500">*</span>}
+      </label>
+      <textarea
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        placeholder={placeholder}
+        rows={rows}
+        className="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 px-4 text-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-slate-600"
+        required={required}
+      />
+    </div>
+  );
+
+  const Checkbox = ({ label, name, checked }) => (
+    <label className="flex items-start space-x-3 p-3 rounded-lg hover:bg-slate-800/50 cursor-pointer transition-colors border border-transparent hover:border-slate-700">
+      <input
+        type="checkbox"
+        name={name}
+        checked={checked}
+        onChange={handleChange}
+        className="mt-1 h-5 w-5 rounded border-slate-600 bg-slate-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900"
+      />
+      <span className="text-slate-300 text-sm">{label}</span>
+    </label>
+  );
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
+      {/* Background Decor */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8">
+        
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center p-3 bg-slate-900 rounded-xl border border-slate-800 mb-4 shadow-2xl shadow-blue-900/20">
+            <Bot className="w-8 h-8 text-blue-500 mr-2" />
+            <h1 className="text-2xl font-bold tracking-tight text-white">Bluv <span className="text-blue-500">Developer</span></h1>
+          </div>
+          <p className="text-slate-400 max-w-lg mx-auto">
+            Ready to bring your bot to life? Fill out the details below so we can start building your custom Discord application.
+          </p>
+        </div>
+
+        {/* Progress Steps */}
+        {!submitted && (
+          <div className="mb-8 overflow-x-auto">
+            <div className="flex justify-between items-center min-w-[300px] px-2">
+              {[
+                { id: 1, label: 'User', icon: User },
+                { id: 2, label: 'Bot Specs', icon: Bot },
+                { id: 3, label: 'Server', icon: Server },
+                { id: 4, label: 'TOS', icon: FileText }
+              ].map((s, idx) => (
+                <div key={s.id} className="flex flex-col items-center relative z-10 w-1/4">
+                  <div 
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                      step >= s.id 
+                        ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                        : 'bg-slate-900 border-slate-700 text-slate-500'
+                    }`}
+                  >
+                    <s.icon size={18} />
+                  </div>
+                  <span className={`text-xs mt-2 font-medium ${step >= s.id ? 'text-blue-400' : 'text-slate-600'}`}>
+                    {s.label}
+                  </span>
+                  {/* Connecting Line */}
+                  {idx !== 3 && (
+                    <div className="absolute top-5 left-[50%] w-full h-[2px] -z-10">
+                      <div className={`h-full transition-all duration-500 ${step > s.id ? 'bg-blue-600' : 'bg-slate-800'}`}></div>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Discord Username</label>
-                            <input type="text" name="discord_username" placeholder="e.g. user_name" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Discord User ID</label>
-                            <input type="number" name="discord_id" placeholder="e.g. 123456789..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Nickname</label>
-                            <input type="text" name="nickname" placeholder="Preferred name" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Contact Method</label>
-                            <select name="contact_method" class="input-field w-full rounded-lg px-4 py-3 text-white appearance-none cursor-pointer">
-                                <option value="DM">Direct Message</option>
-                                <option value="Ticket">Ticket</option>
-                                <option value="Mutual Server">Mutual Server</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">How did you find me?</label>
-                            <input type="text" name="discovery" placeholder="Source" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
-                            <input type="text" name="timezone" placeholder="e.g. EST" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Extra Info / Alts</label>
-                            <input type="text" name="extra_accounts" placeholder="Optional" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                    </div>
+                  )}
                 </div>
+              ))}
             </div>
+          </div>
+        )}
 
-            <!-- STEP 2: Bot Specs & Advanced Commands -->
-            <div id="step2" class="step-content">
-                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-purple-500/10 text-purple-400 p-2 rounded-lg"><i class="fa-solid fa-microchip"></i></span>
-                        <h2 class="text-2xl font-bold text-white">Bot Features</h2>
-                    </div>
+        {/* Main Card */}
+        <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300">
+          {submitted ? (
+            // Success / Copy View
+            <div className="p-8 md:p-12 text-center animate-in fade-in zoom-in duration-500">
+              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Check className="w-10 h-10 text-green-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">Ready to Submit!</h2>
+              <p className="text-slate-400 mb-8">
+                Your request has been formatted into a secure code block. 
+                <br/>Click below to copy it, then paste it into your ticket or DM.
+              </p>
+              
+              <div className="bg-slate-950 rounded-lg p-4 text-left font-mono text-xs text-slate-400 overflow-x-auto border border-slate-800 mb-8 max-h-64 shadow-inner">
+                <pre>{generateReport()}</pre>
+              </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Bot Name</label>
-                            <input type="text" name="bot_name" placeholder="Name" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Avatar URL</label>
-                            <input type="url" name="bot_avatar" placeholder="https://..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Commands Type</label>
-                            <div class="flex gap-2">
-                                <label class="flex-1 cursor-pointer bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-purple-500 transition text-center">
-                                    <input type="radio" name="cmd_pref" value="Slash" class="hidden peer" checked>
-                                    <span class="text-sm peer-checked:text-purple-400">Slash (/)</span>
-                                </label>
-                                <label class="flex-1 cursor-pointer bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-purple-500 transition text-center">
-                                    <input type="radio" name="cmd_pref" value="Prefix" class="hidden peer">
-                                    <span class="text-sm peer-checked:text-purple-400">Prefix (!)</span>
-                                </label>
-                            </div>
-                        </div>
-                         <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Activity Status</label>
-                            <input type="text" name="bot_status" placeholder="Playing..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                         <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Theme Color</label>
-                            <div class="flex items-center gap-3">
-                                <input type="color" name="theme_color" value="#5865F2" class="h-12 w-full bg-transparent rounded cursor-pointer border border-gray-700">
-                            </div>
-                        </div>
-                         <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Global Admin Roles</label>
-                            <input type="text" name="admin_roles" placeholder="Owner, Admin..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                    </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  onClick={copyToClipboard}
+                  className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-8 rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                >
+                  <Copy size={18} />
+                  Copy to Clipboard
+                </button>
+                <button 
+                  onClick={() => setSubmitted(false)}
+                  className="text-slate-400 hover:text-white font-medium py-3 px-8 transition-colors"
+                >
+                  Edit Request
+                </button>
+              </div>
+            </div>
+          ) : (
+            // Form Steps
+            <div className={`p-6 md:p-8 ${animate ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} transition-all duration-300`}>
+              
+              {/* Step 1: User Profile */}
+              {step === 1 && (
+                <div className="space-y-6">
+                  <div className="border-l-4 border-blue-500 pl-4 mb-6">
+                    <h2 className="text-xl font-bold text-white">User Profile</h2>
+                    <p className="text-slate-400 text-sm">Let's get to know who I am working with.</p>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Discord Username" name="discordUsername" placeholder="e.g. bluv_dev" required icon={User} />
+                    <InputField label="Discord User ID" name="discordId" placeholder="e.g. 847382..." required icon={Shield} />
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Preferred Name" name="nickname" placeholder="What should I call you?" />
+                    <InputField label="Timezone" name="timezone" placeholder="e.g. EST, GMT+1" icon={Globe} />
+                  </div>
 
-                    <!-- Dynamic Command Section -->
-                    <div class="border-t border-gray-700 pt-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-white">Detailed Command List</h3>
-                            <button type="button" onclick="addCommand()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded transition">
-                                <i class="fa-solid fa-plus mr-1"></i> Add Command
-                            </button>
-                        </div>
-                        
-                        <div id="commandsContainer" class="space-y-4">
-                            <!-- Commands will be added here via JS -->
-                        </div>
-                        <p id="noCommandsMsg" class="text-gray-500 text-sm italic text-center py-4">No commands added yet. Click "Add Command".</p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Contact Method</label>
+                      <select 
+                        name="contactMethod" 
+                        value={formData.contactMethod} 
+                        onChange={handleChange}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-4 text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                      >
+                        <option value="">Select Option</option>
+                        <option value="Direct Message">Direct Message</option>
+                        <option value="Ticket System">Ticket System</option>
+                        <option value="Mutual Server">Mutual Server</option>
+                      </select>
                     </div>
+                    <InputField label="How did you find me?" name="referralSource" placeholder="Reddit, Server, Friend..." />
+                  </div>
+
+                  <TextArea label="Extra / Alt Accounts" name="extraInfo" placeholder="Any alt accounts or other details?" rows={2} />
                 </div>
-            </div>
+              )}
 
-            <!-- STEP 3: Server Info -->
-            <div id="step3" class="step-content">
-                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-green-500/10 text-green-400 p-2 rounded-lg"><i class="fa-solid fa-server"></i></span>
-                        <h2 class="text-2xl font-bold text-white">Target Server</h2>
+              {/* Step 2: Bot Specs */}
+              {step === 2 && (
+                <div className="space-y-6">
+                  <div className="border-l-4 border-purple-500 pl-4 mb-6">
+                    <h2 className="text-xl font-bold text-white">Bot Specifications</h2>
+                    <p className="text-slate-400 text-sm">How should your bot behave?</p>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Bot Name" name="botName" placeholder="MyCoolBot" required icon={Bot} />
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Primary Category</label>
+                      <select 
+                        name="category" 
+                        value={formData.category} 
+                        onChange={handleChange}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-4 text-slate-200 focus:ring-2 focus:ring-purple-500 outline-none"
+                      >
+                        <option value="">Select Category</option>
+                        <option value="Moderation">Moderation</option>
+                        <option value="Economy">Economy</option>
+                        <option value="Music">Music</option>
+                        <option value="Ticketing">Ticketing</option>
+                        <option value="Utility">Utility</option>
+                        <option value="Fun">Fun</option>
+                      </select>
                     </div>
+                  </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Server Name</label>
-                            <input type="text" name="server_name" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Invite Link</label>
-                            <input type="url" name="server_invite" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Server ID</label>
-                            <input type="number" name="server_id" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Language</label>
-                            <input type="text" name="language" value="English" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
-                        </div>
-                        <div class="col-span-1 md:col-span-2 flex items-center gap-4 bg-gray-800/30 p-3 rounded-lg border border-gray-700">
-                            <input type="checkbox" name="nsfw_content" id="nsfw" class="w-5 h-5 rounded bg-gray-700 custom-checkbox">
-                            <label for="nsfw" class="text-sm text-gray-300">Server contains NSFW content?</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Avatar URL" name="botAvatar" placeholder="https://..." />
+                    <InputField label="Status Activity" name="botStatus" placeholder="Playing with code..." icon={Zap} />
+                  </div>
 
-            <!-- STEP 4: TOS & Finish -->
-            <div id="step4" class="step-content">
-                <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden border-t-4 border-red-500">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="bg-red-500/10 text-red-400 p-2 rounded-lg"><i class="fa-solid fa-file-contract"></i></span>
-                        <h2 class="text-2xl font-bold text-white">Agreement</h2>
-                    </div>
-
-                    <div class="space-y-4 text-sm text-gray-300 mb-6">
-                        <label class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded transition">
-                            <input type="checkbox" required class="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-700 custom-checkbox">
-                            <span>I agree to Discord's TOS (No spam/scams).</span>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-slate-400 mb-2">Command Preference</label>
+                    <div className="flex gap-4">
+                      {['Slash Commands (/help)', 'Prefix (!help)', 'Both'].map((opt) => (
+                        <label key={opt} className={`flex-1 border rounded-lg p-3 cursor-pointer transition-all ${formData.commandPref === opt ? 'bg-purple-600/20 border-purple-500 text-white' : 'border-slate-700 hover:bg-slate-800'}`}>
+                          <input type="radio" name="commandPref" value={opt} checked={formData.commandPref === opt} onChange={handleChange} className="hidden" />
+                          <div className="text-center text-sm font-medium">{opt}</div>
                         </label>
-                        <label class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded transition">
-                            <input type="checkbox" required class="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-700 custom-checkbox">
-                            <span>I understand this is a free service with no 100% uptime guarantee.</span>
-                        </label>
-                        <label class="flex items-start gap-3 cursor-pointer hover:bg-white/5 p-2 rounded transition">
-                            <input type="checkbox" required class="mt-1 w-5 h-5 rounded border-gray-600 bg-gray-700 custom-checkbox">
-                            <span>I agree not to resell the bot or claim the code as mine.</span>
-                        </label>
+                      ))}
                     </div>
+                  </div>
 
-                    <div class="pt-6 border-t border-gray-700">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Digital Signature</label>
-                        <div class="flex flex-col md:flex-row gap-4">
-                            <input type="text" name="signature_name" placeholder="Full Username" class="input-field flex-1 rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
-                            <input type="date" name="signature_date" class="input-field md:w-48 rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
-                        </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Theme Color</label>
+                      <div className="flex gap-2">
+                        <input 
+                          type="color" 
+                          name="themeColor" 
+                          value={formData.themeColor} 
+                          onChange={handleChange}
+                          className="h-10 w-10 bg-transparent border-0 rounded cursor-pointer"
+                        />
+                        <input 
+                          type="text" 
+                          name="themeColor" 
+                          value={formData.themeColor} 
+                          onChange={handleChange} 
+                          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 text-slate-200 uppercase font-mono"
+                        />
+                      </div>
                     </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Hosting</label>
+                      <select name="hosting" value={formData.hosting} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-4 text-slate-200 outline-none">
+                        <option value="Yes, manage it for me">Yes, manage it for me (24/7)</option>
+                        <option value="No, self-hosting">No, I will host it myself</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <TextArea label="Full Command List" name="commandList" placeholder="/ban - bans a user&#10;/kick - kicks a user&#10;!coinflip - flips a coin" rows={4} required />
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Admin Role Names" name="adminRoles" placeholder="Admin, Mod, Owner" />
+                    <InputField label="Log Channel Name" name="logChannel" placeholder="#logs, #mod-logs" />
+                  </div>
                 </div>
-            </div>
-        </form>
-    </main>
+              )}
 
-    <!-- SUCCESS SCREEN (Hidden by default) -->
-    <div id="successScreen" class="w-full max-w-2xl text-center animate-slide-up pb-24">
-        <div class="glass-panel rounded-3xl p-8 md:p-12 shadow-2xl border border-green-500/30">
-            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/50">
-                <i class="fa-solid fa-check text-4xl text-white"></i>
-            </div>
-            <h2 class="text-4xl font-bold text-white mb-2">Order Confirmed!</h2>
-            <p class="text-gray-400 mb-8">Sent to Bluv. We've got your request.</p>
+              {/* Step 3: Target Server */}
+              {step === 3 && (
+                <div className="space-y-6">
+                   <div className="border-l-4 border-green-500 pl-4 mb-6">
+                    <h2 className="text-xl font-bold text-white">Target Server</h2>
+                    <p className="text-slate-400 text-sm">Where will this bot live?</p>
+                  </div>
 
-            <div class="bg-black/30 rounded-xl p-6 mb-8 text-left space-y-4 border border-gray-700">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Order ID</p>
-                    <p class="text-xl font-mono text-blue-400" id="displayOrderID">LOADING...</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Public ID</p>
-                        <p class="text-sm font-mono text-gray-300" id="displayPublicID">...</p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <InputField label="Server Name" name="serverName" placeholder="My Community" required icon={Server} />
+                    <InputField label="Server ID (Guild ID)" name="serverId" placeholder="Numeric ID" required />
+                  </div>
+
+                  <InputField label="Server Invite Link" name="serverInvite" placeholder="https://discord.gg/..." />
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Member Count</label>
+                      <select name="memberCount" value={formData.memberCount} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-4 text-slate-200 outline-none">
+                        <option value="">Select Range</option>
+                        <option value="< 100">&lt; 100</option>
+                        <option value="100 - 500">100 - 500</option>
+                        <option value="500 - 1000">500 - 1000</option>
+                        <option value="1000+">1000+</option>
+                      </select>
                     </div>
-                    <div>
-                         <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">BSID (Secret)</p>
-                         <p class="text-sm font-mono text-red-400 blur-sm hover:blur-none transition cursor-pointer" id="displayBSID">HOVER TO REVEAL</p>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-slate-400 mb-1">Primary Language</label>
+                      <input type="text" name="primaryLanguage" value={formData.primaryLanguage} onChange={handleChange} className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-4 text-slate-200 outline-none" />
                     </div>
+                  </div>
+
+                  <InputField label="Bot Permissions Needed" name="botPermissions" placeholder="Administrator, Manage Messages, etc." />
+                  
+                  <TextArea label="Conflicting Bots" name="conflicts" placeholder="Do you have Dyno, MEE6, etc?" rows={2} />
+
+                  <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700/50">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input type="checkbox" name="nsfw" checked={formData.nsfw} onChange={handleChange} className="h-5 w-5 rounded border-slate-600 bg-slate-700 text-red-500 focus:ring-red-500" />
+                      <span className="text-slate-200 font-medium">This server contains NSFW (18+) content</span>
+                    </label>
+                  </div>
                 </div>
-            </div>
+              )}
 
-            <div class="text-sm text-gray-400 space-y-3 mb-8 bg-blue-900/10 p-4 rounded-lg border border-blue-500/20">
-                <p><i class="fa-solid fa-clock mr-2 text-blue-400"></i> Expect a response within <strong>10 - 1,440 minutes</strong>.</p>
-                <p><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> <strong>Important:</strong> Bluv needs a developer role with <strong>Administrator</strong> permissions to set up your bot. Please discuss this when we contact you if you have concerns.</p>
-            </div>
+              {/* Step 4: TOS & Sign */}
+              {step === 4 && (
+                <div className="space-y-6">
+                   <div className="border-l-4 border-red-500 pl-4 mb-6">
+                    <h2 className="text-xl font-bold text-white">Terms of Service</h2>
+                    <p className="text-slate-400 text-sm">Please read carefully before signing.</p>
+                  </div>
 
-            <p class="text-xs text-gray-500">Please save your Order ID and BSID. You may need them for support.</p>
+                  <div className="space-y-3 bg-slate-950/50 p-6 rounded-xl border border-slate-800">
+                    <Checkbox name="agreeTOS" checked={formData.agreeTOS} label="I agree this bot will NOT be used for raiding, spamming, scamming, or breaking Discord TOS." />
+                    <Checkbox name="agreeUptime" checked={formData.agreeUptime} label="I understand uptime is not guaranteed (24/7) as this is a free service." />
+                    <Checkbox name="agreeAbuse" checked={formData.agreeAbuse} label="I accept Bluv reserves the right to shutdown the bot if abused." />
+                    <Checkbox name="agreeOwnership" checked={formData.agreeOwnership} label="I agree not to claim the code as my own or resell it." />
+                    <Checkbox name="agreeData" checked={formData.agreeData} label="I consent to my IDs being stored for bot configuration." />
+                    <Checkbox name="agreeTermination" checked={formData.agreeTermination} label="I understand Bluv may stop hosting if support is no longer viable." />
+                  </div>
+
+                  <div className="pt-4">
+                    <InputField label="Final Signature (Discord Username)" name="signature" placeholder="Type your username to sign" required />
+                    <div className="text-right text-xs text-slate-500">Date: {formData.date}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between mt-10 pt-6 border-t border-slate-800">
+                {step > 1 ? (
+                  <button onClick={prevStep} className="flex items-center text-slate-400 hover:text-white transition-colors px-4 py-2">
+                    <ChevronLeft size={20} className="mr-1" /> Back
+                  </button>
+                ) : (
+                  <div></div>
+                )}
+
+                {step < 4 ? (
+                  <button onClick={nextStep} className="flex items-center bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg font-medium transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+                    Next Step <ChevronRight size={20} className="ml-1" />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setSubmitted(true)} 
+                    disabled={!formData.signature || !formData.agreeTOS}
+                    className="flex items-center bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg font-bold transition-all shadow-lg shadow-green-900/20 active:scale-95"
+                  >
+                    Complete & Generate <Send size={18} className="ml-2" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-    </div>
-
-    <!-- Navigation Buttons (Hidden on Success) -->
-    <div id="navBar" class="fixed bottom-0 left-0 w-full bg-[#0f1115]/80 backdrop-blur-xl border-t border-gray-800 p-4 z-50">
-        <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <button id="prevBtn" onclick="changeStep(-1)" class="text-gray-400 hover:text-white font-medium px-6 py-3 rounded-xl transition hidden">
-                <i class="fa-solid fa-arrow-left mr-2"></i> Back
-            </button>
-            
-            <div class="flex-1"></div>
-
-            <button id="nextBtn" onclick="changeStep(1)" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-10 rounded-xl shadow-lg shadow-blue-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
-                Next <i class="fa-solid fa-arrow-right"></i>
-            </button>
-            
-            <!-- Replaces the Copy button with Submit -->
-            <button id="submitBtn" onclick="submitToWebhook()" class="hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-green-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane"></i> Submit Application
-            </button>
+        
+        <div className="text-center mt-8 text-slate-600 text-xs">
+          &copy; {new Date().getFullYear()} Bluv Developer • Free Hosting Service
         </div>
+      </div>
     </div>
-
-    <!-- Processing Overlay -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
-        <div class="text-center">
-            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
-            <h3 class="text-xl font-bold text-white">Sending to Bluv...</h3>
-        </div>
-    </div>
-
-    <script>
-        // Init Date
-        document.querySelector('input[name="signature_date"]').valueAsDate = new Date();
-
-        let currentStep = 1;
-        const totalSteps = 4;
-        const webhookURL = "https://discord.com/api/webhooks/1447128249938214913/pLN2yVBVOzBeFzVVkCi1ybFOGvaXAGurrwPfwQ3FziGdnC5Jdm7X6KwjueCN5A0-YPZ-";
-
-        // --- COMMAND MANAGEMENT ---
-        let commandCount = 0;
-
-        function addCommand() {
-            commandCount++;
-            document.getElementById('noCommandsMsg').style.display = 'none';
-            
-            const container = document.getElementById('commandsContainer');
-            const div = document.createElement('div');
-            div.className = "command-card rounded-xl p-4 relative animate-fade-in";
-            div.id = `cmd-${commandCount}`;
-            
-            div.innerHTML = `
-                <div class="flex justify-between items-start mb-4 border-b border-gray-700 pb-2">
-                    <h4 class="text-blue-400 font-bold">Command #${commandCount}</h4>
-                    <button type="button" onclick="removeCommand(${commandCount})" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash"></i></button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="col-span-1">
-                        <label class="block text-xs text-gray-400 mb-1">Command Name</label>
-                        <input type="text" class="cmd-name input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="/example" required>
-                    </div>
-                    <div class="col-span-1">
-                         <label class="block text-xs text-gray-400 mb-1">Type</label>
-                         <select class="cmd-type input-field w-full rounded px-3 py-2 text-sm text-white" onchange="checkOther(this)">
-                            <option value="Moderation">Moderation</option>
-                            <option value="Economy">Economy</option>
-                            <option value="Fun">Fun</option>
-                            <option value="Utility">Utility</option>
-                            <option value="Music">Music</option>
-                            <option value="Leveling">Leveling</option>
-                            <option value="Other">Other (Specify)</option>
-                        </select>
-                        <input type="text" class="cmd-type-other input-field w-full rounded px-3 py-2 text-sm text-white mt-2 hidden" placeholder="Specify type...">
-                    </div>
-                    
-                    <div class="col-span-1 md:col-span-2">
-                        <label class="block text-xs text-gray-400 mb-1">What it does (Min 2 Sentences)</label>
-                        <textarea class="cmd-desc input-field w-full rounded px-3 py-2 text-sm text-white" rows="2" placeholder="Describe functionality..." required></textarea>
-                    </div>
-
-                    <div class="col-span-1">
-                        <label class="block text-xs text-gray-400 mb-1">Who can use it? (Roles/IDs)</label>
-                        <input type="text" class="cmd-perms input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="@Admin, 12345..." required>
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-xs text-gray-400 mb-1">Logging Channel</label>
-                        <input type="text" class="cmd-log input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="#logs" required>
-                    </div>
-                     <div class="col-span-1 md:col-span-2">
-                        <label class="block text-xs text-gray-400 mb-1">Prefix / Extras</label>
-                        <input type="text" class="cmd-extra input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="Any extra flags or details?">
-                    </div>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-
-        function removeCommand(id) {
-            document.getElementById(`cmd-${id}`).remove();
-            if (document.getElementById('commandsContainer').children.length === 0) {
-                document.getElementById('noCommandsMsg').style.display = 'block';
-            }
-        }
-
-        function checkOther(select) {
-            const input = select.nextElementSibling;
-            if (select.value === 'Other') {
-                input.classList.remove('hidden');
-                input.setAttribute('required', 'true');
-            } else {
-                input.classList.add('hidden');
-                input.removeAttribute('required');
-            }
-        }
-
-        // --- NAVIGATION ---
-        function updateUI() {
-            for(let i=1; i<=totalSteps; i++) {
-                const el = document.getElementById(`step${i}`);
-                if(i === currentStep) {
-                    el.classList.add('active');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    el.classList.remove('active');
-                }
-                
-                const ind = document.getElementById(`ind${i}`);
-                if (i <= currentStep) ind.classList.add('active');
-                else ind.classList.remove('active');
-            }
-
-            document.getElementById('progressBar').style.width = `${((currentStep - 1) / (totalSteps - 1)) * 100}%`;
-
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const submitBtn = document.getElementById('submitBtn');
-
-            prevBtn.classList.toggle('hidden', currentStep === 1);
-            
-            if (currentStep === totalSteps) {
-                nextBtn.classList.add('hidden');
-                submitBtn.classList.remove('hidden');
-                submitBtn.classList.add('animate-fade-in');
-            } else {
-                nextBtn.classList.remove('hidden');
-                submitBtn.classList.add('hidden');
-            }
-        }
-
-        function changeStep(n) {
-            // Validate Step 2 Command Description Length
-            if (n === 1 && currentStep === 2) {
-                 const descs = document.querySelectorAll('.cmd-desc');
-                 let descValid = true;
-                 descs.forEach(d => {
-                     // Rough check for 2 sentences (looking for punctuation)
-                     const sentences = d.value.split(/[.!?]+/).filter(s => s.trim().length > 0);
-                     if (sentences.length < 2) {
-                         alert("Each command description must be at least 2 sentences long.");
-                         d.style.borderColor = "red";
-                         descValid = false;
-                     } else {
-                         d.style.borderColor = "";
-                     }
-                 });
-                 if (!descValid) return;
-            }
-
-            // General Validation
-            if (n === 1) {
-                const currentStepEl = document.getElementById(`step${currentStep}`);
-                const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
-                let valid = true;
-                inputs.forEach(input => {
-                    if (!input.checkValidity()) {
-                        input.reportValidity();
-                        valid = false;
-                    }
-                });
-                if (!valid) return;
-            }
-
-            currentStep += n;
-            updateUI();
-        }
-
-        // --- SUBMISSION ---
-        function generateID(prefix) {
-            return prefix + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        }
-
-        async function submitToWebhook() {
-             // Final Check
-            if (!document.getElementById('botForm').checkValidity()) {
-                document.getElementById('botForm').reportValidity();
-                return;
-            }
-
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-
-            // Gather Data
-            const formData = new FormData(document.getElementById('botForm'));
-            const data = Object.fromEntries(formData.entries());
-            const nsfw = document.getElementById('nsfw').checked ? "Yes" : "No";
-
-            // Gather Commands
-            let commandsText = "";
-            const cmdCards = document.querySelectorAll('.command-card');
-            if (cmdCards.length === 0) {
-                commandsText = "No specific commands listed.";
-            } else {
-                cmdCards.forEach((card, index) => {
-                    const name = card.querySelector('.cmd-name').value;
-                    const typeSel = card.querySelector('.cmd-type').value;
-                    const typeOther = card.querySelector('.cmd-type-other').value;
-                    const type = typeSel === 'Other' ? typeOther : typeSel;
-                    const desc = card.querySelector('.cmd-desc').value;
-                    const perms = card.querySelector('.cmd-perms').value;
-                    const log = card.querySelector('.cmd-log').value;
-                    const extra = card.querySelector('.cmd-extra').value;
-
-                    commandsText += `**${index+1}. ${name}** (${type})\n> ${desc}\n> *Perms:* ${perms} | *Log:* ${log}\n> *Extra:* ${extra}\n\n`;
-                });
-            }
-
-            // Generate IDs
-            const orderID = generateID('ORD');
-            const publicID = generateID('PUB');
-            const bsid = generateID('BSID'); // Secret
-
-            // Payload
-            const embed = {
-                title: "🤖 New Bot Request",
-                color: 5793266, // Blurple
-                fields: [
-                    { name: "User Info", value: `**User:** ${data.discord_username}\n**ID:** ${data.discord_id}\n**Method:** ${data.contact_method}`, inline: true },
-                    { name: "Server Info", value: `**Name:** ${data.server_name}\n**ID:** ${data.server_id}\n**NSFW:** ${nsfw}`, inline: true },
-                    { name: "Bot Specs", value: `**Name:** ${data.bot_name}\n**Category:** ${data.bot_category}\n**Type:** ${data.cmd_pref}`, inline: false },
-                    { name: "Requested Commands", value: commandsText.substring(0, 1024) || "None" }, // Truncate if huge
-                    { name: "IDs", value: `**Order:** ${orderID}\n**Public:** ${publicID}\n**BSID:** ||${bsid}||` }
-                ],
-                footer: { text: `Signed by ${data.signature_name} on ${data.signature_date}` }
-            };
-
-            // Send
-            try {
-                const response = await fetch(webhookURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ embeds: [embed] })
-                });
-
-                if (response.ok) {
-                    showSuccess(orderID, publicID, bsid);
-                } else {
-                    alert("Error sending request. Discord API returned error.");
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Network error. Please try again.");
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }
-        }
-
-        function showSuccess(ord, pub, bsid) {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('progressContainer').style.display = 'none';
-            document.getElementById('formMain').style.display = 'none';
-            document.getElementById('navBar').style.display = 'none';
-
-            // Populate IDs
-            document.getElementById('displayOrderID').innerText = ord;
-            document.getElementById('displayPublicID').innerText = pub;
-            document.getElementById('displayBSID').innerText = bsid;
-
-            const screen = document.getElementById('successScreen');
-            screen.style.display = 'block';
-
-            // Confetti
-            var duration = 3000;
-            var end = Date.now() + duration;
-
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#5865F2', '#ffffff']
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#5865F2', '#ffffff']
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
-        }
-
-        // Init
-        updateUI();
-    </script>
-</body>
-</html>
+  );
+}
