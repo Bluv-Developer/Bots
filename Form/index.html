@@ -38,6 +38,7 @@
                         'float': 'float 6s ease-in-out infinite',
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'flash-red': 'flashRed 2s infinite',
                     },
                     keyframes: {
                         float: {
@@ -47,6 +48,10 @@
                         fadeIn: {
                             '0%': { opacity: '0', transform: 'translateY(10px)' },
                             '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        flashRed: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.5 },
                         }
                     }
                 }
@@ -153,6 +158,34 @@
             word-break: break-all;
             overflow-wrap: break-word;
         }
+        
+        /* Permission Grid */
+        .perm-checkbox:checked + div {
+            background-color: rgba(212, 180, 131, 0.2);
+            border-color: #d4b483;
+        }
+        
+        .danger-tooltip {
+            visibility: hidden;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7f1d1d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            width: 200px;
+            text-align: center;
+            z-index: 10;
+            margin-bottom: 5px;
+            border: 1px solid #ef4444;
+        }
+        
+        .danger-icon:hover + .danger-tooltip {
+            visibility: visible;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans" oncontextmenu="return false;">
@@ -187,7 +220,7 @@
                     <i class="fab fa-discord mr-1"></i> Community
                 </a>
                 <div class="text-sm font-mono text-earth-400 bg-earth-800/50 px-4 py-2 rounded-lg border border-earth-700 animate-pulse-slow">
-                    Step <span id="step-indicator" class="text-tan-accent font-bold text-lg">1</span> / 4
+                    Step <span id="step-indicator" class="text-tan-accent font-bold text-lg">1</span> / 5
                 </div>
             </div>
         </div>
@@ -392,8 +425,43 @@
                 </div>
             </div>
 
-            <!-- STEP 4: TECH STACK -->
+            <!-- STEP 4: ROLES & PERMISSIONS -->
             <div id="step-4" class="step-panel">
+                <div class="glass-panel rounded-3xl p-8 md:p-12">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-earth-700 pb-6 gap-4">
+                        <div>
+                            <h1 class="text-4xl font-light text-white mb-2">Roles & Permissions</h1>
+                            <p class="text-earth-400">Configure your staff team and their capabilities.</p>
+                        </div>
+                        <button type="button" onclick="addRoleRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i> Add User/Staff
+                        </button>
+                    </div>
+
+                    <div id="roles-container" class="space-y-6">
+                        <div id="empty-roles" class="text-center py-20 border-2 border-dashed border-earth-700 rounded-2xl bg-earth-800/30">
+                            <i class="fas fa-users-cog text-4xl text-earth-600 mb-4 animate-float"></i>
+                            <p class="text-earth-400 text-sm">No users added yet. Click "Add User/Staff" to start.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <div class="flex items-center gap-2 opacity-70">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5">
+                        <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" onclick="changeStep(3)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
+                        <button type="button" onclick="validateAndNext(4)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50 transform hover:-translate-y-1">
+                            Next Step <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: TECH STACK -->
+            <div id="step-5" class="step-panel">
                 <div class="glass-panel rounded-3xl p-8 md:p-12">
                     <div class="mb-10 border-b border-earth-700 pb-4">
                         <h1 class="text-4xl font-light text-white mb-2">Tech Info</h1>
@@ -449,7 +517,7 @@
                         <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
                     </div>
                     <div class="flex gap-4 items-center">
-                        <button type="button" onclick="changeStep(3)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
+                        <button type="button" onclick="changeStep(4)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
                         <button type="button" onclick="submitToWebhook()" id="submitBtn" class="bg-tan-accent hover:bg-white text-earth-900 px-12 py-5 rounded-xl font-bold tracking-wider text-sm shadow-xl hover:shadow-tan-accent/60 transform hover:-translate-y-1 transition-all">
                             <i class="fas fa-paper-plane mr-2"></i> SEND REQUEST
                         </button>
@@ -792,6 +860,158 @@
             `;
             container.appendChild(row);
         }
+        
+        // --- Roles & Permissions Logic ---
+        function addRoleRow() {
+            document.getElementById('empty-roles').style.display = 'none';
+            const container = document.getElementById('roles-container');
+            const id = Date.now();
+            
+            const row = document.createElement('div');
+            row.className = "role-row bg-earth-800/50 p-6 rounded-2xl border border-earth-700 animate-fade-in hover:border-tan-accent/30 transition-colors";
+            row.id = `role-${id}`;
+            row.innerHTML = `
+                <div class="flex justify-between mb-4">
+                    <span class="text-xs font-bold bg-purple-500 text-white px-2 py-1 rounded">USER/ROLE</span>
+                    <i class="fas fa-trash text-earth-500 hover:text-red-400 cursor-pointer" onclick="document.getElementById('role-${id}').remove()"></i>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                             <label class="block text-[10px] text-earth-400 mb-1">Username <span class="text-red-500">*</span></label>
+                             <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="User#0000">
+                        </div>
+                        <div>
+                             <label class="block text-[10px] text-earth-400 mb-1">Discord ID <span class="text-red-500">*</span></label>
+                             <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="123456789...">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">Top 3 Roles <span class="text-red-500">*</span></label>
+                            <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="e.g. Owner, Admin, Mod">
+                         </div>
+                         <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">What do they do? <span class="text-red-500">*</span></label>
+                            <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="e.g. Manages the server">
+                         </div>
+                    </div>
+
+                    <!-- Presets -->
+                    <div>
+                        <label class="block text-[10px] text-earth-400 mb-2">Preset Permissions</label>
+                        <div class="flex flex-wrap gap-2">
+                             ${createPresetRadio(id, 'Owner', true)}
+                             ${createPresetRadio(id, 'Admin', true)}
+                             ${createPresetRadio(id, 'Mod', false)}
+                             ${createPresetRadio(id, 'Trial', false)}
+                             ${createPresetRadio(id, 'Extra', false)}
+                        </div>
+                        <div id="danger-warning-${id}" class="hidden mt-2 text-xs text-red-400 bg-red-900/20 p-2 rounded border border-red-500/30 flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle animate-flash-red"></i> 
+                            <span>Warning: This preset grants dangerous high-level permissions.</span>
+                        </div>
+                        <div id="preset-info-${id}" class="hidden mt-2 text-xs text-tan-accent bg-tan-accent/10 p-2 rounded border border-tan-accent/30">
+                            <!-- JS fills this -->
+                        </div>
+                    </div>
+
+                    <!-- Manual Perms -->
+                    <div>
+                        <button type="button" onclick="document.getElementById('perms-grid-${id}').classList.toggle('hidden')" class="text-xs text-earth-400 hover:text-white flex items-center gap-1 mb-2">
+                            <i class="fas fa-cog"></i> Configure Permissions Manually
+                        </button>
+                        <div id="perms-grid-${id}" class="hidden grid grid-cols-2 md:grid-cols-3 gap-2 bg-black/20 p-4 rounded-lg">
+                            ${createPermCheckbox('Administrator', true)}
+                            ${createPermCheckbox('Manage Server', true)}
+                            ${createPermCheckbox('Manage Roles', true)}
+                            ${createPermCheckbox('Manage Channels', true)}
+                            ${createPermCheckbox('Ban Members', true)}
+                            ${createPermCheckbox('Kick Members', true)}
+                            ${createPermCheckbox('Manage Messages', true)}
+                            ${createPermCheckbox('Manage Webhooks', true)}
+                            ${createPermCheckbox('Mention Everyone', true)}
+                            ${createPermCheckbox('View Audit Log', false)}
+                            ${createPermCheckbox('Manage Emojis', false)}
+                            ${createPermCheckbox('Change Nickname', false)}
+                            ${createPermCheckbox('Manage Nicknames', false)}
+                            ${createPermCheckbox('Send Messages', false)}
+                            ${createPermCheckbox('Embed Links', false)}
+                            ${createPermCheckbox('Attach Files', false)}
+                            ${createPermCheckbox('Add Reactions', false)}
+                            ${createPermCheckbox('Connect', false)}
+                            ${createPermCheckbox('Speak', false)}
+                            ${createPermCheckbox('Mute Members', false)}
+                            ${createPermCheckbox('Deafen Members', false)}
+                            ${createPermCheckbox('Move Members', false)}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] text-earth-400 mb-1">Notes on User</label>
+                        <textarea class="input-casual w-full p-3 rounded-lg text-sm h-16 resize-none" placeholder="Any specific details?"></textarea>
+                    </div>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        function createPresetRadio(id, name, isDangerous) {
+            const dangerClass = isDangerous ? 'text-red-400' : 'text-earth-300';
+            return `
+                <label class="cursor-pointer bg-earth-700/50 border border-earth-600 px-3 py-1.5 rounded-lg flex items-center gap-2 hover:bg-earth-600 transition-colors">
+                    <input type="radio" name="preset-${id}" value="${name}" class="hidden peer" onclick="handlePresetClick('${id}', '${name}', ${isDangerous})">
+                    <span class="text-xs ${dangerClass} peer-checked:text-white font-bold">${name}</span>
+                    <i class="fas fa-info-circle text-[10px] text-earth-500 hover:text-white" onclick="showPresetInfo('${id}', '${name}', event)"></i>
+                </label>
+            `;
+        }
+
+        function createPermCheckbox(name, isDangerous) {
+            const dangerIcon = isDangerous ? `<i class="fas fa-exclamation-circle text-red-500 text-xs ml-1 danger-icon"></i><div class="danger-tooltip">Dangerous: Grants high-level control.</div>` : '';
+            return `
+                <label class="flex items-center gap-2 cursor-pointer relative">
+                    <input type="checkbox" class="perm-checkbox w-3 h-3 rounded border-earth-500 bg-earth-800 text-tan-accent focus:ring-0">
+                    <span class="text-xs text-earth-300 select-none">${name}</span>
+                    ${dangerIcon}
+                </label>
+            `;
+        }
+
+        function handlePresetClick(id, preset, isDangerous) {
+            const warning = document.getElementById(`danger-warning-${id}`);
+            if (isDangerous) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+            // Auto-check permissions based on preset (Simple logic for demo)
+            const checkboxes = document.querySelectorAll(`#perms-grid-${id} input[type="checkbox"]`);
+            checkboxes.forEach(cb => {
+                const label = cb.nextElementSibling.innerText;
+                cb.checked = false; // Reset
+                if (preset === 'Owner') cb.checked = true;
+                if (preset === 'Admin' && label !== 'Administrator') cb.checked = true; // Admin gets most except straight Admin sometimes
+                if (preset === 'Mod' && (label.includes('Message') || label.includes('Kick') || label.includes('Mute'))) cb.checked = true;
+                if (preset === 'Trial' && (label.includes('Message') || label.includes('Mute'))) cb.checked = true;
+            });
+        }
+
+        function showPresetInfo(id, preset, e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const infoBox = document.getElementById(`preset-info-${id}`);
+            let text = "";
+            if(preset === 'Owner') text = "Has FULL access to everything. Be careful.";
+            if(preset === 'Admin') text = "Can manage server settings, roles, channels, and ban members.";
+            if(preset === 'Mod') text = "Can manage messages, kick members, and mute/timeout.";
+            if(preset === 'Trial') text = "Limited access. Usually just muting or basic moderation.";
+            if(preset === 'Extra') text = "Custom role with no specific defaults.";
+            
+            infoBox.innerText = text;
+            infoBox.classList.remove('hidden');
+            setTimeout(() => infoBox.classList.add('hidden'), 5000);
+        }
 
         // --- ID Generator ---
         function generateId(prefix) {
@@ -819,7 +1039,7 @@
             // 1. Send Identity
             const colorSelection = document.getElementById('colorSelect').value === 'custom' ? document.getElementById('customColorInput').value : document.getElementById('colorSelect').value;
             
-            let identityMsg = "**New Bot Request [1/3]: Identity** 🆔\n";
+            let identityMsg = "**New Bot Request [1/4]: Identity** 🆔\n";
             identityMsg += `**IDs:** Order: \`${orderId}\` | Bluv: \`${bluvId}\` | Unit: \`${unitId}\`\n`;
             identityMsg += `**Client:** ${fd.get('client_discord')} (${fd.get('client_id')})\n`;
             identityMsg += `**Server:** ${fd.get('server_name')} (<${fd.get('server_invite')}>)\n`;
@@ -835,7 +1055,7 @@
 
                 // 2. Commands
                 const cmdRows = document.querySelectorAll('.command-row');
-                let cmdMsg = "**New Bot Request [2/3]: Commands** 🤖\n\n";
+                let cmdMsg = "**New Bot Request [2/4]: Commands** 🤖\n\n";
                 
                 for (let i = 0; i < cmdRows.length; i++) {
                     const row = cmdRows[i];
@@ -867,7 +1087,7 @@
 
                 // 3. Features
                 const featRows = document.querySelectorAll('.feature-row');
-                let featMsg = "**New Bot Request [3/3]: Features** ✨\n\n";
+                let featMsg = "**New Bot Request [3/4]: Features** ✨\n\n";
 
                 for (let i = 0; i < featRows.length; i++) {
                     const row = featRows[i];
@@ -893,6 +1113,40 @@
                     }
                 }
                 if(featRows.length > 0) await sendWebhook(webhookURL, featMsg);
+                
+                // 4. Roles
+                const roleRows = document.querySelectorAll('.role-row');
+                let roleMsg = "**New Bot Request [4/4]: Roles & Staff** 👥\n\n";
+                
+                for (let i = 0; i < roleRows.length; i++) {
+                    const row = roleRows[i];
+                    const inputs = row.querySelectorAll('input[type="text"]');
+                    const username = inputs[0].value;
+                    const id = inputs[1].value;
+                    const roles = inputs[2].value;
+                    const desc = inputs[3].value;
+                    const notes = row.querySelector('textarea').value;
+                    
+                    // Get checked preset
+                    const presetChecked = row.querySelector('input[type="radio"]:checked');
+                    const preset = presetChecked ? presetChecked.value : "None";
+                    
+                    // Get Manual Perms
+                    const perms = [];
+                    row.querySelectorAll('.perm-checkbox:checked').forEach(cb => {
+                        perms.push(cb.nextElementSibling.innerText);
+                    });
+                    
+                    const entry = `**${i+1}. ${username}** (${id})\n   - Roles: ${roles}\n   - Duty: ${desc}\n   - Preset: **${preset}**\n   - Perms: ${perms.join(', ') || 'None'}\n   - Notes: ${notes}\n\n`;
+                    
+                    if ((roleMsg + entry).length > 1900) {
+                        await sendWebhook(webhookURL, roleMsg);
+                        roleMsg = "**Roles Continued...**\n" + entry;
+                    } else {
+                        roleMsg += entry;
+                    }
+                }
+                if(roleRows.length > 0) await sendWebhook(webhookURL, roleMsg);
 
                 // Populate Success Screen with IDs
                 const idContainer = document.getElementById('generatedIds');
