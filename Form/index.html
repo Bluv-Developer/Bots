@@ -1,1160 +1,721 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discord Bot Specification Form | Bluv Development</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Bluv Development | Bot Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    },
+                    colors: {
+                        // Casual Earth Theme
+                        earth: {
+                            900: '#1c1917', // Warm Black
+                            800: '#292524', // Dark Espresso
+                            700: '#44403c', // Stone
+                            600: '#57534e',
+                            500: '#78716c',
+                            400: '#a8a29e',
+                            300: '#d6d3d1', // Tan
+                            200: '#e7e5e4',
+                            100: '#f5f5f4', // Off White
+                        },
+                        tan: {
+                            accent: '#d4b483', // Gold/Tan Accent
+                            glow: 'rgba(212, 180, 131, 0.3)'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-
-        :root {
-            --primary: #7289da;
-            --primary-dark: #5b6eae;
-            --secondary: #5865f2;
-            --dark: #121212;
-            --darker: #0a0a0a;
-            --light: #f8f9fa;
-            --gray: #2f3136;
-            --gray-light: #40444b;
-            --accent: #43b581;
-            --accent-red: #f04747;
-            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-
         body {
-            background-color: var(--darker);
-            color: var(--light);
-            line-height: 1.6;
-            overflow-x: hidden;
+            background-color: #1c1917;
+            color: #e7e5e4;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(41, 37, 36, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 180, 131, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        /* Header Styles */
-        header {
-            background: linear-gradient(135deg, var(--darker) 0%, var(--gray) 100%);
-            padding: 2rem 0;
-            border-bottom: 1px solid rgba(114, 137, 218, 0.2);
-            position: relative;
-            overflow: hidden;
+        /* Custom Inputs */
+        .input-casual {
+            background-color: rgba(28, 25, 23, 0.5);
+            border: 1px solid #44403c;
+            color: #fff;
+            transition: all 0.3s ease;
         }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            animation: pulse 2s infinite alternate;
-        }
-
-        .logo-text h1 {
-            font-size: 2.2rem;
-            background: linear-gradient(to right, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: 1px;
-        }
-
-        .logo-text p {
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-
-        .header-badge {
-            background: rgba(114, 137, 218, 0.1);
-            border: 1px solid var(--primary);
-            border-radius: 20px;
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            animation: glow 3s infinite alternate;
-        }
-
-        /* Main Layout */
-        main {
-            display: flex;
-            margin-top: 2rem;
-            gap: 2rem;
-            position: relative;
-        }
-
-        /* Navigation Sidebar */
-        .sidebar {
-            flex: 0 0 250px;
-            position: sticky;
-            top: 2rem;
-            height: fit-content;
-            background-color: rgba(47, 49, 54, 0.8);
-            border-radius: 12px;
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(114, 137, 218, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideInLeft 0.8s ease-out;
-        }
-
-        .sidebar h2 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar h2 i {
-            font-size: 1.1rem;
-        }
-
-        .nav-list {
-            list-style: none;
-        }
-
-        .nav-item {
-            margin-bottom: 12px;
-            position: relative;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 15px;
-            color: #ddd;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 3px;
-            background-color: var(--primary);
-            transform: translateX(-10px);
-            transition: var(--transition);
-        }
-
-        .nav-link:hover {
-            background-color: rgba(114, 137, 218, 0.1);
-            color: white;
-            padding-left: 20px;
-        }
-
-        .nav-link:hover::before {
-            transform: translateX(0);
-        }
-
-        .nav-link.active {
-            background-color: rgba(114, 137, 218, 0.2);
-            color: white;
-            padding-left: 20px;
-        }
-
-        .nav-link.active::before {
-            transform: translateX(0);
-        }
-
-        .nav-link i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .progress-container {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-bar {
-            height: 6px;
-            background-color: var(--gray-light);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 25%;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
-            border-radius: 3px;
-            transition: width 0.8s ease;
-        }
-
-        .progress-text {
-            font-size: 0.9rem;
-            color: #aaa;
-            text-align: center;
-        }
-
-        /* Form Content */
-        .form-content {
-            flex: 1;
-            animation: fadeInUp 0.8s ease-out 0.3s both;
-        }
-
-        .form-section {
-            background-color: rgba(47, 49, 54, 0.8);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid rgba(114, 137, 218, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: var(--transition);
-        }
-
-        .form-section.active {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(114, 137, 218, 0.2);
-        }
-
-        .section-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 1.8rem;
-            color: white;
-        }
-
-        .section-subtitle {
-            color: #aaa;
-            font-size: 1rem;
-            margin-top: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 1.8rem;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .form-col {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 10px;
-            color: #ddd;
-            font-weight: 500;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 14px 15px;
-            background-color: rgba(64, 68, 75, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        input:focus, select:focus, textarea:focus {
+        .input-casual:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.2);
+            border-color: #d4b483;
+            background-color: rgba(28, 25, 23, 0.8);
+            box-shadow: 0 0 15px rgba(212, 180, 131, 0.1);
+        }
+        
+        .input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
         }
 
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .checkbox-group, .radio-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .checkbox-item, .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .checkbox-item input, .radio-item input {
-            width: auto;
-        }
-
-        .range-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .range-container input {
-            flex: 1;
-        }
-
-        .range-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .feature-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .feature-item {
-            background-color: rgba(64, 68, 75, 0.6);
-            padding: 12px 15px;
+        /* Context Menu */
+        #custom-context-menu {
+            position: absolute;
+            z-index: 1000;
+            display: none;
+            background: rgba(28, 25, 23, 0.95);
+            border: 1px solid #44403c;
             border-radius: 8px;
-            border: 1px solid transparent;
-            transition: var(--transition);
+            padding: 8px 0;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .ctx-item {
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #d6d3d1;
             cursor: pointer;
-        }
-
-        .feature-item:hover {
-            border-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        .feature-item.selected {
-            background-color: rgba(114, 137, 218, 0.2);
-            border-color: var(--primary);
-        }
-
-        .feature-item input {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        /* Footer & Navigation */
-        .form-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn {
-            padding: 14px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: var(--transition);
+            transition: background 0.2s;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
+        .ctx-item:hover {
+            background: rgba(212, 180, 131, 0.1);
+            color: #d4b483;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(114, 137, 218, 0.3);
-        }
-
-        .btn-secondary {
-            background-color: rgba(64, 68, 75, 0.8);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(64, 68, 75, 1);
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, var(--accent), #3ca374);
-            color: white;
-            padding: 16px 40px;
-            font-size: 1.1rem;
-        }
-
-        /* Animations */
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(114, 137, 218, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(114, 137, 218, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(114, 137, 218, 0);
-            }
-        }
-
-        @keyframes glow {
-            0% {
-                box-shadow: 0 0 5px rgba(114, 137, 218, 0.5);
-            }
-            100% {
-                box-shadow: 0 0 15px rgba(114, 137, 218, 0.8);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            main {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                position: relative;
-                top: 0;
-                width: 100%;
-            }
-            
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-            
-            .form-col {
-                min-width: 100%;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .feature-list {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-navigation {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+        .step-panel { display: none; animation: fadeIn 0.6s ease-out; }
+        .step-panel.active { display: block; }
+        img { pointer-events: none; }
+        
+        /* Color Preview Circle */
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #44403c;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
         }
     </style>
 </head>
-<body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fab fa-discord"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h1>Bluv Development</h1>
-                        <p>Discord Bot Specification Form</p>
-                    </div>
-                </div>
-                <div class="header-badge">
-                    <i class="fas fa-code"></i> Custom Bot Development
+<body class="min-h-screen flex flex-col font-sans" oncontextmenu="return false;">
+
+    <!-- Context Menu -->
+    <div id="custom-context-menu">
+        <div class="ctx-item" onclick="location.reload()"><i class="fas fa-redo"></i> Refresh Form</div>
+        <div class="ctx-item" onclick="resetForm()"><i class="fas fa-eraser"></i> Clear Answers</div>
+        <div class="border-t border-earth-700 my-1"></div>
+        <div class="ctx-item text-xs text-earth-500 cursor-default hover:bg-transparent">Powered by Bluv</div>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b-0 mb-8">
+        <div class="max-w-6xl mx-auto px-8 h-24 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Bots" class="h-16 w-auto object-contain">
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="text-sm font-mono text-earth-400 bg-earth-800/50 px-4 py-2 rounded-lg border border-earth-700">
+                    Step <span id="step-indicator" class="text-white font-bold text-lg">1</span> of 4
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container">
-        <main>
-            <!-- Sidebar Navigation -->
-            <aside class="sidebar">
-                <h2><i class="fas fa-bars"></i> Form Sections</h2>
-                <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="#section-1a" class="nav-link active" data-section="1a">
-                            <i class="fas fa-users"></i> Audience & Demographics
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#section-1b" class="nav-link" data-section="1b">
-                            <i class="fas fa-rocket"></i> Growth & Expansion
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#section-1c" class="nav-link" data-section="1c">
-                            <i class="fas fa-shield-alt"></i> Security & Compliance
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#section-7a" class="nav-link" data-section="7a">
-                            <i class="fas fa-mobile-alt"></i> Multi-Platform Integration
-                        </a>
-                    </li>
-                </ul>
-                
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                    <div class="progress-text" id="progress-text">25% Complete</div>
-                </div>
-            </aside>
-
-            <!-- Form Content -->
-            <div class="form-content">
-                <!-- Section 1A: Bot Audience & Demographics -->
-                <section id="section-1a" class="form-section active">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">Bot Audience & Demographics</h2>
-                            <p class="section-subtitle">Define your target audience and distribution strategy</p>
-                        </div>
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-start px-6 pb-32">
+        <form id="botForm" class="w-full max-w-5xl space-y-10">
+            
+            <!-- STEP 1: BASICS -->
+            <div id="step-1" class="step-panel active">
+                <div class="glass-panel rounded-2xl p-10">
+                    <div class="mb-10 border-b border-earth-700 pb-4">
+                        <h1 class="text-4xl font-light text-white mb-2">The Basics</h1>
+                        <p class="text-earth-400">Please fill out all fields below to proceed.</p>
                     </div>
 
-                    <div class="form-group">
-                        <label>Primary User Base (Age Groups)</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-13-15" checked>
-                                <label for="age-13-15">13-15 (Teen)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Client Info -->
+                        <div class="space-y-6">
+                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Your Info</h3>
+                            <div>
+                                <label class="block text-xs text-earth-400 mb-2">Discord Username <span class="text-red-500">*</span></label>
+                                <input type="text" name="client_discord" required class="input-casual w-full p-4 rounded-xl" placeholder="Username#0000">
                             </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-15-17" checked>
-                                <label for="age-15-17">15-17 (Young Adult)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-17-22">
-                                <label for="age-17-22">17-22 (College/University)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-22-30">
-                                <label for="age-22-30">22-30 (Young Professional)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-30-45">
-                                <label for="age-30-45">30-45 (Adult)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="age-45">
-                                <label for="age-45">45+ (Mature)</label>
+                            <div>
+                                <label class="block text-xs text-earth-400 mb-2">Discord ID <span class="text-red-500">*</span></label>
+                                <input type="text" name="client_id" required class="input-casual w-full p-4 rounded-xl" placeholder="123456789...">
                             </div>
                         </div>
-                    </div>
 
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="custom-age-range">Custom Age Range</label>
-                                <input type="text" id="custom-age-range" placeholder="e.g. 18 to 35">
+                        <!-- Server Info -->
+                        <div class="space-y-6">
+                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Server Info</h3>
+                            <div>
+                                <label class="block text-xs text-earth-400 mb-2">Server Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="server_name" required class="input-casual w-full p-4 rounded-xl" placeholder="My Awesome Server">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-earth-400 mb-2">Server Invite Link <span class="text-red-500">*</span></label>
+                                <input type="text" name="server_invite" required class="input-casual w-full p-4 rounded-xl" placeholder="discord.gg/...">
                             </div>
                         </div>
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="tech-level">User Technical Level</label>
-                                <select id="tech-level">
-                                    <option value="non-technical">Non-technical (Basic Discord users)</option>
-                                    <option value="intermediate">Intermediate (Knows bots/commands)</option>
-                                    <option value="advanced">Advanced (Tech-savvy, understands APIs)</option>
-                                    <option value="developers">Developers (Will extend/modify)</option>
-                                </select>
+
+                        <!-- Bot Persona -->
+                        <div class="md:col-span-2 mt-4 pt-6 border-t border-earth-700/50">
+                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest mb-6">Bot Identity</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-xs text-earth-400 mb-2">Bot Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="bot_name" required class="input-casual w-full p-4 rounded-xl" placeholder="Helper Bot">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-earth-400 mb-2">Prefix <span class="text-red-500">*</span></label>
+                                    <select name="bot_prefix" required class="input-casual w-full p-4 rounded-xl cursor-pointer">
+                                        <option value="/">Slash Commands (/)</option>
+                                        <option value="!">Exclamation (!)</option>
+                                        <option value="?">Question (?)</option>
+                                        <option value=".">Dot (.)</option>
+                                        <option value="$">Money ($)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-earth-400 mb-2">Status <span class="text-red-500">*</span></label>
+                                    <select name="bot_status" required class="input-casual w-full p-4 rounded-xl cursor-pointer">
+                                        <option value="Online">Online</option>
+                                        <option value="Idle">Idle</option>
+                                        <option value="Do Not Disturb">Do Not Disturb</option>
+                                        <option value="Invisible">Invisible</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Enhanced Color Picker -->
+                            <div class="mt-6 p-6 bg-earth-800/30 rounded-xl border border-earth-700">
+                                <label class="block text-xs text-earth-400 mb-2">Bot Color Theme <span class="text-red-500">*</span></label>
+                                <div class="flex flex-col md:flex-row gap-4 items-center">
+                                    <div class="relative w-full">
+                                        <select id="colorSelect" name="theme_color_select" onchange="handleColorChange()" class="input-casual w-full p-4 pl-12 rounded-xl cursor-pointer appearance-none">
+                                            <option value="#3b82f6" data-color="#3b82f6">Bluv Blue</option>
+                                            <option value="#d4b483" data-color="#d4b483">Casual Tan</option>
+                                            <option value="#000000" data-color="#000000">Midnight Black</option>
+                                            <option value="#ffffff" data-color="#ffffff">Classic White</option>
+                                            <option value="#ef4444" data-color="#ef4444">Alert Red</option>
+                                            <option value="#22c55e" data-color="#22c55e">Success Green</option>
+                                            <option value="custom" data-color="transparent">Custom Hex Code...</option>
+                                        </select>
+                                        <div id="colorPreview" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full border border-earth-500 bg-blue-500 shadow-lg"></div>
+                                    </div>
+                                    <input type="text" id="customColorInput" name="custom_theme_color" class="input-casual w-full md:w-1/3 p-4 rounded-xl hidden" placeholder="#XXXXXX">
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label>Regional Considerations</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="region-na" checked>
-                                <label for="region-na">North America focused</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="region-eu">
-                                <label for="region-eu">Europe/UK focused</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="region-apac">
-                                <label for="region-apac">Asia-Pacific focused</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="region-global">
-                                <label for="region-global">Global audience</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="specific-country">Specific Country (if applicable)</label>
-                                <input type="text" id="specific-country" placeholder="e.g. United States">
-                            </div>
-                        </div>
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="deployment-type">Deployment Type</label>
-                                <select id="deployment-type">
-                                    <option value="private">Private Bot (Single server only)</option>
-                                    <option value="whitelisted">Whitelisted (Approved servers only)</option>
-                                    <option value="public">Public Bot (Listed on top.gg/botlists)</option>
-                                    <option value="enterprise">Enterprise (Multiple company servers)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 1B: Growth & Expansion Planning -->
-                <section id="section-1b" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-rocket"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">Growth & Expansion Planning</h2>
-                            <p class="section-subtitle">Define your bot's roadmap, monetization, and marketing strategy</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Phase 1 (Launch) - Must-have features</label>
-                        <textarea id="phase1-features" placeholder="List the essential features for your bot's initial launch..."></textarea>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="phase1-timeline">Phase 1 Timeline</label>
-                                <select id="phase1-timeline">
-                                    <option value="1-2 weeks">1-2 weeks</option>
-                                    <option value="3-4 weeks">3-4 weeks</option>
-                                    <option value="1-2 months">1-2 months</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="growth-expectations">Growth Expectations</label>
-                                <select id="growth-expectations">
-                                    <option value="small">Small & Stable (< 5 servers)</option>
-                                    <option value="growing">Growing Community (5-50 servers)</option>
-                                    <option value="large">Large Scale (50-500 servers)</option>
-                                    <option value="mass">Mass Public (500+ servers, top.gg listing)</option>
-                                    <option value="viral">Viral Potential (Could hit 1000+ servers)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Monetization Strategy</label>
-                        <div class="feature-list">
-                            <div class="feature-item">
-                                <input type="checkbox" id="monetization-free">
-                                <label for="monetization-free">No Monetization (Free forever)</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="monetization-donations">
-                                <label for="monetization-donations">Optional Donations</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="monetization-premium">
-                                <label for="monetization-premium">Premium Features (Freemium)</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="monetization-subscription">
-                                <label for="monetization-subscription">Subscription Tier</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Bot List Submissions</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="list-topgg" checked>
-                                <label for="list-topgg">top.gg</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="list-discordbots">
-                                <label for="list-discordbots">discord.bots.gg</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="list-discords">
-                                <label for="list-discords">discords.com/bots</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="list-all">
-                                <label for="list-all">All major bot lists</label>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 1C: Security & Compliance -->
-                <section id="section-1c" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">Security & Compliance</h2>
-                            <p class="section-subtitle">Configure security, data protection, and legal requirements</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Data Collection Level</label>
-                        <div class="radio-group">
-                            <div class="radio-item">
-                                <input type="radio" id="data-minimal" name="data-collection" checked>
-                                <label for="data-minimal">Minimal (User IDs only)</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="data-standard" name="data-collection">
-                                <label for="data-standard">Standard (IDs, command usage)</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="data-advanced" name="data-collection">
-                                <label for="data-advanced">Advanced (Analytics, behavior)</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="data-full" name="data-collection">
-                                <label for="data-full">Full (Messages, for moderation)</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>User Rights Features</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="rights-delete" checked>
-                                <label for="rights-delete">Right to delete data</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="rights-export">
-                                <label for="rights-export">Data export functionality</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="rights-privacy">
-                                <label for="rights-privacy">Privacy policy page</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="rights-cookie">
-                                <label for="rights-cookie">Cookie consent system</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Security Protection Systems</label>
-                        <div class="feature-list">
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-ddos" checked>
-                                <label for="security-ddos">DDoS protection</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-rate" checked>
-                                <label for="security-rate">Rate limiting</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-sql">
-                                <label for="security-sql">SQL injection prevention</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-xss">
-                                <label for="security-xss">XSS protection</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-2fa">
-                                <label for="security-2fa">Two-factor auth for dashboard</label>
-                            </div>
-                            <div class="feature-item">
-                                <input type="checkbox" id="security-audit">
-                                <label for="security-audit">Audit logs for all actions</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="backup-frequency">Backup Frequency</label>
-                                <select id="backup-frequency">
-                                    <option value="hourly">Hourly</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="age-restriction">Age Restrictions</label>
-                                <select id="age-restriction">
-                                    <option value="13+">All ages (13+ per Discord ToS)</option>
-                                    <option value="16+">16+ (GDPR compliance)</option>
-                                    <option value="18+">18+ (Adult content)</option>
-                                    <option value="21+">21+ (Restricted regions)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Section 7A: Multi-Platform Integration -->
-                <section id="section-7a" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-mobile-alt"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">Multi-Platform Integration</h2>
-                            <p class="section-subtitle">Configure web dashboard, mobile support, and API access</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Dashboard Access Level</label>
-                        <div class="radio-group">
-                            <div class="radio-item">
-                                <input type="radio" id="dashboard-admin" name="dashboard-access" checked>
-                                <label for="dashboard-admin">Admin-only dashboard</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="dashboard-public" name="dashboard-access">
-                                <label for="dashboard-public">Public status page</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="dashboard-user" name="dashboard-access">
-                                <label for="dashboard-user">User profiles (for economy)</label>
-                            </div>
-                            <div class="radio-item">
-                                <input type="radio" id="dashboard-config" name="dashboard-access">
-                                <label for="dashboard-config">Server configuration panel</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Dashboard Features</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-realtime" checked>
-                                <label for="feature-realtime">Real-time statistics</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-graphs">
-                                <label for="feature-graphs">Live command usage graphs</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-analytics">
-                                <label for="feature-analytics">Server member analytics</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-monitoring">
-                                <label for="feature-monitoring">Bot performance monitoring</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-config">
-                                <label for="feature-config">Configuration wizard</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="feature-backup">
-                                <label for="feature-backup">Backup manager</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Mobile Support</label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="mobile-responsive" checked>
-                                <label for="mobile-responsive">Responsive web dashboard</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="mobile-pwa">
-                                <label for="mobile-pwa">PWA (Progressive Web App)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="mobile-app">
-                                <label for="mobile-app">iOS/Android app (additional cost)</label>
-                            </div>
-                            <div class="checkbox-item">
-                                <input type="checkbox" id="mobile-optimized" checked>
-                                <label for="mobile-optimized">Discord mobile optimized</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="api-access">API Access Level</label>
-                                <select id="api-access">
-                                    <option value="none">No external API</option>
-                                    <option value="read-only">Read-only API</option>
-                                    <option value="rest">Full REST API</option>
-                                    <option value="websocket">WebSocket real-time API</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-col">
-                            <div class="input-group">
-                                <label for="api-docs">API Documentation</label>
-                                <select id="api-docs">
-                                    <option value="basic">Basic documentation</option>
-                                    <option value="detailed">Detailed with examples</option>
-                                    <option value="interactive">Interactive (Swagger/OpenAPI)</option>
-                                    <option value="none">No documentation</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Form Navigation -->
-                <div class="form-navigation">
-                    <button class="btn btn-secondary" id="prev-btn">
-                        <i class="fas fa-arrow-left"></i> Previous Section
-                    </button>
-                    <button class="btn btn-primary" id="next-btn">
-                        Next Section <i class="fas fa-arrow-right"></i>
-                    </button>
                 </div>
 
-                <!-- Submit Button (only visible on last section) -->
-                <div class="form-navigation" style="display: none;" id="submit-container">
-                    <button class="btn btn-submit" id="submit-btn">
-                        <i class="fas fa-paper-plane"></i> Submit Specification
+                <div class="mt-8 flex justify-between items-center">
+                    <div class="flex items-center gap-2 opacity-50">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
+                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    </div>
+                    <button type="button" onclick="validateAndNext(1)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50 transform hover:-translate-y-1">
+                        Next Step <i class="fas fa-arrow-right ml-2"></i>
                     </button>
                 </div>
             </div>
-        </main>
+
+            <!-- STEP 2: COMMANDS -->
+            <div id="step-2" class="step-panel">
+                <div class="glass-panel rounded-2xl p-10">
+                    <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
+                        <div>
+                            <h1 class="text-4xl font-light text-white mb-2">Commands</h1>
+                            <p class="text-earth-400">Add commands. Be specific!</p>
+                        </div>
+                        <button type="button" onclick="addCommandRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
+                            <i class="fas fa-plus mr-1"></i> Add Command
+                        </button>
+                    </div>
+
+                    <div id="commands-container" class="space-y-6">
+                        <div id="empty-commands" class="text-center py-20 border-2 border-dashed border-earth-700 rounded-2xl bg-earth-800/30">
+                            <i class="fas fa-robot text-4xl text-earth-600 mb-4 animate-float"></i>
+                            <p class="text-earth-400 text-sm">No commands yet. Click "Add Command" to start.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <div class="flex items-center gap-2 opacity-50">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
+                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" onclick="changeStep(1)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
+                        <button type="button" onclick="validateAndNext(2)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50">
+                            Next Step <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: FEATURES -->
+            <div id="step-3" class="step-panel">
+                <div class="glass-panel rounded-2xl p-10">
+                    <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
+                        <div>
+                            <h1 class="text-4xl font-light text-white mb-2">Features</h1>
+                            <p class="text-earth-400">Passive systems like Welcomers, Logging, etc.</p>
+                        </div>
+                        <button type="button" onclick="addFeatureRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
+                            <i class="fas fa-plus mr-1"></i> Add Feature
+                        </button>
+                    </div>
+
+                    <div id="features-container" class="space-y-6">
+                        <div id="empty-features" class="text-center py-20 border-2 border-dashed border-earth-700 rounded-2xl bg-earth-800/30">
+                            <i class="fas fa-magic text-4xl text-earth-600 mb-4 animate-float"></i>
+                            <p class="text-earth-400 text-sm">No features yet. Click "Add Feature" to start.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <div class="flex items-center gap-2 opacity-50">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
+                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="button" onclick="changeStep(2)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
+                        <button type="button" onclick="validateAndNext(3)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50">
+                            Next Step <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: TECH STACK -->
+            <div id="step-4" class="step-panel">
+                <div class="glass-panel rounded-2xl p-10">
+                    <div class="mb-10 border-b border-earth-700 pb-4">
+                        <h1 class="text-4xl font-light text-white mb-2">Tech Info</h1>
+                        <p class="text-earth-400">Final details.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div class="space-y-4">
+                            <label class="block text-xs font-bold text-tan-accent uppercase tracking-widest">Language</label>
+                            <div class="relative opacity-75">
+                                <select name="language" class="input-casual w-full p-4 rounded-xl text-earth-400 cursor-not-allowed" disabled>
+                                    <option value="Python (discord.py)" selected>Python (discord.py)</option>
+                                </select>
+                                <i class="fas fa-lock absolute right-4 top-4 text-earth-500"></i>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <label class="block text-xs font-bold text-tan-accent uppercase tracking-widest">Hosting</label>
+                            <div class="relative opacity-75">
+                                <input type="text" name="hosting" value="BDH (Bluv Development Hosting)" class="input-casual w-full p-4 rounded-xl text-tan-accent font-bold cursor-not-allowed" readonly>
+                                <i class="fas fa-server absolute right-4 top-4 text-earth-500"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Notice -->
+                    <div class="p-6 bg-earth-900/50 rounded-xl border border-earth-700 mb-8">
+                        <div class="flex items-start gap-4">
+                            <i class="fas fa-shield-alt text-2xl text-tan-accent mt-1"></i>
+                            <div>
+                                <h4 class="text-white font-bold mb-1">Privacy Guarantee</h4>
+                                <p class="text-xs text-earth-400 leading-relaxed">
+                                    We don't share any of your information. We swear by law not to use, sell, or claim your ideas or data without your explicit permission. Your privacy is our priority.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <label class="block text-xs font-bold text-tan-accent uppercase tracking-widest">Any other notes? <span class="text-red-500">*</span></label>
+                        <textarea name="notes" required class="input-casual w-full p-4 rounded-xl h-32 resize-none" placeholder="Do you need any specific APIs? Or have a deadline? Type 'None' if nothing."></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-between items-center">
+                    <div class="flex items-center gap-2 opacity-50">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
+                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <button type="button" onclick="changeStep(3)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
+                        <button type="button" onclick="submitToWebhook()" id="submitBtn" class="bg-tan-accent hover:bg-white text-earth-900 px-12 py-5 rounded-xl font-bold tracking-wider text-sm shadow-xl hover:shadow-tan-accent/60 transform hover:-translate-y-1 transition-all">
+                            <i class="fas fa-paper-plane mr-2"></i> SEND REQUEST
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-md items-center justify-center p-4">
+        <div class="bg-earth-800 border border-tan-accent/30 p-10 rounded-2xl text-center max-w-md shadow-2xl">
+            <div class="w-16 h-16 bg-tan-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-check text-2xl text-tan-accent"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Request Sent!</h2>
+            <p class="text-earth-300 text-sm mb-6">Your bot specification has been securely transmitted. We will review it shortly.</p>
+            <button onclick="location.reload()" class="bg-tan-accent text-earth-900 px-6 py-3 rounded-lg font-bold text-sm hover:bg-white transition-colors">
+                Start New Form
+            </button>
+        </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Section navigation
-            const sections = document.querySelectorAll('.form-section');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const submitContainer = document.getElementById('submit-container');
-            const progressFill = document.getElementById('progress-fill');
-            const progressText = document.getElementById('progress-text');
-            
-            let currentSectionIndex = 0;
-            
-            // Update progress bar
-            function updateProgress() {
-                const progress = ((currentSectionIndex + 1) / sections.length) * 100;
-                progressFill.style.width = `${progress}%`;
-                progressText.textContent = `${Math.round(progress)}% Complete`;
+        // --- Color Picker Logic ---
+        function handleColorChange() {
+            const select = document.getElementById('colorSelect');
+            const preview = document.getElementById('colorPreview');
+            const customInput = document.getElementById('customColorInput');
+            const selectedValue = select.value;
+
+            if (selectedValue === 'custom') {
+                customInput.classList.remove('hidden');
+                preview.style.backgroundColor = 'transparent';
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                preview.style.backgroundColor = selectedValue;
+                customInput.required = false;
             }
-            
-            // Show specific section
-            function showSection(index) {
-                // Hide all sections
-                sections.forEach(section => {
-                    section.classList.remove('active');
-                });
-                
-                // Show selected section
-                sections[index].classList.add('active');
-                
-                // Update navigation buttons
-                if (index === 0) {
-                    prevBtn.style.visibility = 'hidden';
-                } else {
-                    prevBtn.style.visibility = 'visible';
-                }
-                
-                if (index === sections.length - 1) {
-                    nextBtn.style.display = 'none';
-                    submitContainer.style.display = 'flex';
-                } else {
-                    nextBtn.style.display = 'flex';
-                    submitContainer.style.display = 'none';
-                }
-                
-                // Update nav links
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                });
-                navLinks[index].classList.add('active');
-                
-                // Update current index
-                currentSectionIndex = index;
-                
-                // Update progress
-                updateProgress();
-                
-                // Smooth scroll to section
-                sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // --- Custom Category Logic ---
+        function handleCategoryChange(selectElement) {
+            const customInput = selectElement.nextElementSibling;
+            if (selectElement.value === 'Custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+                customInput.required = true;
+            } else {
+                customInput.classList.add('hidden');
+                customInput.required = false;
             }
-            
-            // Navigation button events
-            prevBtn.addEventListener('click', () => {
-                if (currentSectionIndex > 0) {
-                    showSection(currentSectionIndex - 1);
+        }
+
+        // --- Custom Field Logic ---
+        function addCustomField(containerId) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-black/20 p-4 rounded-lg border border-earth-600/50';
+            div.innerHTML = `
+                <input type="text" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="Your Question (e.g. Which channel?)">
+                <input type="text" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="Your Answer">
+                <div class="md:col-span-2 text-right">
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-xs text-red-400 hover:text-red-300 underline">Remove Custom Detail</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // --- Form Navigation & Validation ---
+        function changeStep(step) {
+            document.querySelector('.step-panel.active').classList.remove('active');
+            document.getElementById(`step-${step}`).classList.add('active');
+            document.getElementById('step-indicator').innerText = `${step}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateAndNext(current) {
+            const currentPanel = document.getElementById(`step-${current}`);
+            const inputs = currentPanel.querySelectorAll('input, select, textarea');
+            let valid = true;
+
+            // Basic HTML5 Validity Check
+            inputs.forEach(input => {
+                if (input.offsetParent !== null && !input.checkValidity()) { // Check only visible inputs
+                    input.classList.add('input-error');
+                    input.reportValidity();
+                    valid = false;
+                    // Remove error class on input
+                    input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
                 }
             });
-            
-            nextBtn.addEventListener('click', () => {
-                if (currentSectionIndex < sections.length - 1) {
-                    showSection(currentSectionIndex + 1);
+
+            if (!valid) return;
+
+            // Specific Step Validation
+            if (current === 2) {
+                if (document.querySelectorAll('.command-row').length < 1) {
+                    alert("Please add at least 1 command.");
+                    return;
                 }
-            });
+            }
+            if (current === 3) {
+                if (document.querySelectorAll('.feature-row').length < 3) {
+                    alert("Please add at least 3 features.");
+                    return;
+                }
+            }
+            changeStep(current + 1);
+        }
+
+        function resetForm() {
+            if(confirm("Clear all answers?")) {
+                location.reload();
+            }
+        }
+
+        // --- Dynamic Rows (Commands) ---
+        function addCommandRow() {
+            document.getElementById('empty-commands').style.display = 'none';
+            const container = document.getElementById('commands-container');
+            const id = Date.now();
             
-            // Nav link events
-            navLinks.forEach((link, index) => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showSection(index);
-                });
-            });
+            const row = document.createElement('div');
+            row.className = "command-row bg-earth-800/50 p-6 rounded-2xl border border-earth-700 animate-fade-in hover:border-tan-accent/30 transition-colors";
+            row.id = `cmd-${id}`;
+            row.innerHTML = `
+                <div class="flex justify-between mb-4">
+                    <span class="text-xs font-bold bg-tan-accent text-earth-900 px-2 py-1 rounded">CMD</span>
+                    <i class="fas fa-trash text-earth-500 hover:text-red-400 cursor-pointer" onclick="document.getElementById('cmd-${id}').remove()"></i>
+                </div>
+                <div class="space-y-4" id="cmd-fields-${id}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">Command Name <span class="text-red-500">*</span></label>
+                            <input type="text" required class="input-casual w-full p-3 rounded-lg text-lg font-mono" placeholder="/name">
+                         </div>
+                         <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">Who can use this? <span class="text-red-500">*</span></label>
+                            <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="e.g. Everyone, Admins, Mods">
+                         </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-earth-400 mb-1">Description <span class="text-red-500">*</span></label>
+                        <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="What does it do?">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">Category</label>
+                            <select onchange="handleCategoryChange(this)" class="input-casual w-full p-3 rounded-lg text-sm cursor-pointer mb-2">
+                                <option>General</option>
+                                <option>Admin</option>
+                                <option>Fun</option>
+                                <option>Economy</option>
+                                <option>Moderation</option>
+                                <option>Custom</option>
+                            </select>
+                            <input type="text" class="input-casual w-full p-3 rounded-lg text-sm hidden" placeholder="Enter Category Name">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-earth-400 mb-1">Cooldown (sec)</label>
+                            <input type="number" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="0">
+                        </div>
+                    </div>
+                    <!-- Custom Fields Area -->
+                    <div id="cmd-custom-${id}"></div>
+                    <button type="button" onclick="addCustomField('cmd-custom-${id}')" class="text-xs text-tan-accent hover:text-white underline decoration-dashed underline-offset-4">
+                        + Add Custom Detail/Question
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        // --- Dynamic Rows (Features) ---
+        function addFeatureRow() {
+            document.getElementById('empty-features').style.display = 'none';
+            const container = document.getElementById('features-container');
+            const id = Date.now();
             
-            // Feature item selection
-            const featureItems = document.querySelectorAll('.feature-item');
-            featureItems.forEach(item => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                item.addEventListener('click', () => {
-                    checkbox.checked = !checkbox.checked;
-                    if (checkbox.checked) {
-                        item.classList.add('selected');
+            const row = document.createElement('div');
+            row.className = "feature-row bg-earth-800/50 p-6 rounded-2xl border border-earth-700 animate-fade-in hover:border-tan-accent/30 transition-colors";
+            row.id = `feat-${id}`;
+            row.innerHTML = `
+                <div class="flex justify-between mb-4">
+                    <span class="text-xs font-bold bg-earth-600 text-white px-2 py-1 rounded">FEATURE</span>
+                    <i class="fas fa-trash text-earth-500 hover:text-red-400 cursor-pointer" onclick="document.getElementById('feat-${id}').remove()"></i>
+                </div>
+                <div class="space-y-4" id="feat-fields-${id}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                             <label class="block text-[10px] text-earth-400 mb-1">Feature Name <span class="text-red-500">*</span></label>
+                             <input type="text" required class="input-casual w-full p-3 rounded-lg text-lg font-mono" placeholder="e.g. Welcome Message">
+                        </div>
+                        <div>
+                             <label class="block text-[10px] text-earth-400 mb-1">Config Needed? <span class="text-red-500">*</span></label>
+                             <input type="text" required class="input-casual w-full p-3 rounded-lg text-sm" placeholder="e.g. Needs Channel ID, Role ID">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-earth-400 mb-1">How does it work? <span class="text-red-500">*</span></label>
+                        <textarea required class="input-casual w-full p-3 rounded-lg text-sm h-20 resize-none" placeholder="Explain the logic in detail."></textarea>
+                    </div>
+                    <!-- Custom Fields Area -->
+                    <div id="feat-custom-${id}"></div>
+                    <button type="button" onclick="addCustomField('feat-custom-${id}')" class="text-xs text-tan-accent hover:text-white underline decoration-dashed underline-offset-4">
+                        + Add Custom Detail/Question
+                    </button>
+                </div>
+            `;
+            container.appendChild(row);
+        }
+
+        // --- Webhook Submission (Chunked) ---
+        async function submitToWebhook() {
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const webhookURL = "https://discord.com/api/webhooks/1447128249938214913/pLN2yVBVOzBeFzVVkCi1ybFOGvaXAGurrwPfwQ3FziGdnC5Jdm7X6KwjueCN5A0-YPZ-";
+            const form = document.getElementById('botForm');
+            const fd = new FormData(form);
+
+            // 1. Send Identity & Basics
+            const colorSelection = document.getElementById('colorSelect').value === 'custom' ? document.getElementById('customColorInput').value : document.getElementById('colorSelect').value;
+            
+            let identityMsg = "**New Bot Request [1/3]: Identity** 🆔\n";
+            identityMsg += `**Client:** ${fd.get('client_discord')} (${fd.get('client_id')})\n`;
+            identityMsg += `**Server:** ${fd.get('server_name')} (<${fd.get('server_invite')}>)\n`;
+            identityMsg += `**Bot:** ${fd.get('bot_name')} | Prefix: \`${fd.get('bot_prefix')}\` | Status: ${fd.get('bot_status')}\n`;
+            identityMsg += `**Theme:** ${colorSelection}\n`;
+            identityMsg += `**Tech:** Python (discord.py) | Hosting: BDH\n`;
+            identityMsg += `**Notes:** ${fd.get('notes')}`;
+
+            try {
+                await sendWebhook(webhookURL, identityMsg);
+
+                // 2. Process Commands
+                const cmdRows = document.querySelectorAll('.command-row');
+                let cmdMsg = "**New Bot Request [2/3]: Commands** 🤖\n\n";
+                
+                for (let i = 0; i < cmdRows.length; i++) {
+                    const row = cmdRows[i];
+                    const inputs = row.querySelectorAll('input, select');
+                    // Indices depend on layout, but let's grab by context for safety
+                    const name = row.querySelector('input[placeholder="/name"]').value;
+                    const who = row.querySelector('input[placeholder*="Everyone"]').value;
+                    const desc = row.querySelector('input[placeholder*="What does it"]').value;
+                    let cat = row.querySelector('select').value;
+                    if(cat === 'Custom') cat = row.querySelector('input[placeholder="Enter Category Name"]').value;
+                    const cool = row.querySelector('input[placeholder="0"]').value;
+                    
+                    // Custom Fields
+                    let customTxt = "";
+                    const customDivs = row.querySelectorAll('[id^="cmd-custom"] > div');
+                    customDivs.forEach(div => {
+                        const q = div.querySelectorAll('input')[0].value;
+                        const a = div.querySelectorAll('input')[1].value;
+                        if(q && a) customTxt += `    - *${q}:* ${a}\n`;
+                    });
+
+                    const entry = `**${i+1}. /${name}**\n   - Desc: ${desc}\n   - Perms: ${who}\n   - Cat: ${cat} | Cooldown: ${cool}s\n${customTxt}\n`;
+                    
+                    if ((cmdMsg + entry).length > 1900) {
+                        await sendWebhook(webhookURL, cmdMsg);
+                        cmdMsg = "**Commands Continued...**\n" + entry;
                     } else {
-                        item.classList.remove('selected');
+                        cmdMsg += entry;
                     }
-                });
+                }
+                if(cmdRows.length > 0) await sendWebhook(webhookURL, cmdMsg);
+
+
+                // 3. Process Features
+                const featRows = document.querySelectorAll('.feature-row');
+                let featMsg = "**New Bot Request [3/3]: Features** ✨\n\n";
+
+                for (let i = 0; i < featRows.length; i++) {
+                    const row = featRows[i];
+                    const name = row.querySelector('input[placeholder*="Welcome"]').value;
+                    const config = row.querySelector('input[placeholder*="Needs Channel"]').value;
+                    const logic = row.querySelector('textarea').value;
+
+                    // Custom Fields
+                    let customTxt = "";
+                    const customDivs = row.querySelectorAll('[id^="feat-custom"] > div');
+                    customDivs.forEach(div => {
+                        const q = div.querySelectorAll('input')[0].value;
+                        const a = div.querySelectorAll('input')[1].value;
+                        if(q && a) customTxt += `    - *${q}:* ${a}\n`;
+                    });
+
+                    const entry = `**${i+1}. [${name}]**\n   - Config: ${config}\n   - Logic: ${logic}\n${customTxt}\n`;
+
+                    if ((featMsg + entry).length > 1900) {
+                        await sendWebhook(webhookURL, featMsg);
+                        featMsg = "**Features Continued...**\n" + entry;
+                    } else {
+                        featMsg += entry;
+                    }
+                }
+                if(featRows.length > 0) await sendWebhook(webhookURL, featMsg);
+
+                // Success
+                document.getElementById('successModal').classList.remove('hidden');
+                document.getElementById('successModal').classList.add('flex');
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to send. Please check your internet or try again.");
+                btn.disabled = false;
+                btn.innerHTML = 'SEND REQUEST';
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        async function sendWebhook(url, content) {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: content })
             });
-            
-            // Form submission
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.addEventListener('click', () => {
-                // In a real application, you would submit the form data here
-                alert('Thank you for submitting your Discord bot specifications! Our team at Bluv Development will review your requirements and contact you shortly.');
-                
-                // Reset form (for demo purposes)
-                setTimeout(() => {
-                    showSection(0);
-                }, 2000);
-            });
-            
-            // Initialize with first section
-            showSection(0);
-            
-            // Add some animation to form elements on load
-            setTimeout(() => {
-                document.querySelectorAll('.input-group').forEach((group, index) => {
-                    group.style.transitionDelay = `${index * 0.05}s`;
-                    group.style.opacity = '1';
-                    group.style.transform = 'translateY(0)';
-                });
-            }, 500);
-        });
+            if (!response.ok) throw new Error("Webhook Error");
+            // Rate limit safety delay
+            await new Promise(r => setTimeout(r, 500)); 
+        }
     </script>
 </body>
 </html>
