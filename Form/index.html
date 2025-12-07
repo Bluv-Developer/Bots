@@ -1,774 +1,810 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bluv Developer - Bot Development Form</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bluv — Discord Bot Specification Form (Single File)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-        :root {
-            --discord-blurple: #5865F2;
-            --discord-dark: #2C2F33;
-            --discord-darker: #23272A;
-            --discord-light: #99AAB5;
-            --discord-green: #57F287;
-            --discord-yellow: #FEE75C;
-            --discord-red: #ED4245;
-        }
+  <style>
+    :root{
+      --bg:#0f1218; --panel:#121827; --muted:#95a2b3;
+      --text:#eef2f7; --accent:#7c5cff; --accent-2:#00c2ff;
+      --danger:#ff5c7c; --success:#22c55e; --border:#1e2638;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
 
-        body {
-            background-color: var(--discord-darker);
-            color: #FFFFFF;
-            line-height: 1.6;
-            padding: 20px;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(41, 43, 45, 0.1) 0%, rgba(41, 43, 45, 0) 50%),
-                radial-gradient(circle at 85% 30%, rgba(41, 43, 45, 0.1) 0%, rgba(41, 43, 45, 0) 50%);
-        }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 20% 0%, rgba(124,92,255,.18), transparent 60%),
+                  radial-gradient(800px 400px at 90% 10%, rgba(0,194,255,.15), transparent 60%), var(--bg);
+      color:var(--text);
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    .app-header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:24px; border-bottom:1px solid var(--border); backdrop-filter:saturate(140%) blur(6px);
+    }
+    .brand{display:flex; gap:16px; align-items:center}
+    .logo{
+      width:44px; height:44px; border-radius:12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display:grid; place-items:center; box-shadow:var(--shadow); font-size:22px;
+    }
+    .subtitle{color:var(--muted); margin:6px 0 0}
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-            border-bottom: 1px solid var(--discord-dark);
-        }
+    .progress{display:flex; align-items:center; gap:12px}
+    .progress-bar{width:200px; height:8px; background:#0a0d13; border-radius:10px; overflow:hidden}
+    .progress-bar span{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .35s ease}
+    .progress-text{color:var(--muted); font-weight:600}
 
-        .logo {
-            font-size: 2.8rem;
-            color: var(--discord-blurple);
-            margin-bottom: 10px;
-        }
+    .container{max-width:1000px; margin:24px auto; padding:0 16px}
+    form{background:rgba(18,24,39,.7); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow)}
 
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            color: #FFFFFF;
-        }
+    .step{display:none; padding:24px; animation:.4s fadeSlide both}
+    .step.active{display:block}
 
-        .subtitle {
-            font-size: 1.1rem;
-            color: var(--discord-light);
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    @keyframes fadeSlide{
+      from{opacity:0; transform:translateY(8px)}
+      to{opacity:1; transform:translateY(0)}
+    }
 
-        .form-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
+    h2{margin:8px 0 16px}
+    fieldset{border:1px solid var(--border); border-radius:12px; padding:16px; margin:16px 0; background:rgba(10,14,24,.55)}
+    legend{padding:0 8px; color:var(--muted); font-weight:600}
 
-        .sections-nav {
-            flex: 0 0 250px;
-            background-color: var(--discord-dark);
-            border-radius: 10px;
-            padding: 20px;
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
+    .label{display:block; font-weight:700; margin:6px 0 10px}
+    .sub{color:var(--muted); font-size:13px}
 
-        .sections-nav h3 {
-            color: var(--discord-blurple);
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    .field-group{margin:14px 0}
+    .pill-grid{
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .pill-grid label{
+      display:flex; align-items:center; gap:8px;
+      background:#121524; border:1px solid #1c2336; color:#d8e1ee;
+      padding:8px 12px; border-radius:999px; cursor:pointer; transition:transform .1s ease, border-color .2s ease;
+    }
+    .pill-grid label:hover{transform:translateY(-1px); border-color:#2a3555}
+    .pill-grid input{accent-color:var(--accent)}
 
-        .nav-list {
-            list-style: none;
-        }
+    .inline{margin-right:4px}
+    .inline-fields{display:none; gap:10px; margin-top:8px}
+    .inline-input{display:none; margin-left:8px}
 
-        .nav-list li {
-            margin-bottom: 12px;
-        }
+    input[type="text"], input[type="email"], select, textarea{
+      width:100%; background:#0b0e16; border:1px solid #1c2336; color:var(--text);
+      border-radius:10px; padding:10px 12px; outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    textarea{resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(124,92,255,.2)}
 
-        .nav-list a {
-            display: flex;
-            align-items: center;
-            color: var(--discord-light);
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
+    .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
 
-        .nav-list a:hover {
-            background-color: rgba(88, 101, 242, 0.1);
-            color: #FFFFFF;
-        }
+    .nav{display:flex; justify-content:flex-end; gap:10px; margin-top:10px}
+    .btn{
+      background:#1a2134; color:#eaf0fb; border:1px solid #2a3555; padding:10px 14px;
+      border-radius:12px; cursor:pointer; font-weight:700; transition:transform .1s ease, background .2s ease, border-color .2s ease;
+    }
+    .btn:hover{transform:translateY(-1px); background:#232b44}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2)); border:none}
+    .btn.ghost{background:transparent; border:1px dashed #2a3555}
+    .btn:active{transform:translateY(0)}
 
-        .nav-list a.active {
-            background-color: rgba(88, 101, 242, 0.2);
-            color: var(--discord-blurple);
-            font-weight: 600;
-        }
+    .hint{color:var(--muted)}
+    .upload input[type="file"]{width:100%}
 
-        .nav-icon {
-            margin-right: 10px;
-            font-size: 1.2rem;
-            width: 24px;
-            text-align: center;
-        }
+    .app-footer{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:18px 24px; color:var(--muted)
+    }
 
-        .form-sections {
-            flex: 1;
-            min-width: 300px;
-        }
+    .review{
+      background:#0b0e16; border:1px solid #1c2336; border-radius:12px; padding:16px; white-space:pre-wrap;
+    }
 
-        .form-section {
-            background-color: var(--discord-dark);
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            display: none;
-        }
+    /* Required field visuals */
+    [aria-invalid="true"]{border-color:var(--danger) !important; box-shadow:0 0 0 3px rgba(255,92,124,.18) !important}
 
-        .form-section.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .section-icon {
-            font-size: 1.8rem;
-            color: var(--discord-blurple);
-            margin-right: 15px;
-            background-color: rgba(88, 101, 242, 0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .section-title {
-            font-size: 1.6rem;
-            color: #FFFFFF;
-        }
-
-        .section-desc {
-            color: var(--discord-light);
-            font-size: 0.95rem;
-            margin-top: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #FFFFFF;
-        }
-
-        .label-note {
-            font-size: 0.85rem;
-            color: var(--discord-light);
-            font-weight: normal;
-            margin-left: 5px;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 14px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: #FFFFFF;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--discord-blurple);
-            box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .checkbox-group input {
-            width: auto;
-            margin-right: 10px;
-        }
-
-        .checkbox-group label {
-            margin-bottom: 0;
-            font-weight: normal;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-prev {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #FFFFFF;
-        }
-
-        .btn-prev:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-next, .btn-submit {
-            background-color: var(--discord-blurple);
-            color: #FFFFFF;
-        }
-
-        .btn-next:hover, .btn-submit:hover {
-            background-color: #4752c4;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-submit {
-            background-color: var(--discord-green);
-            color: #000000;
-        }
-
-        .btn-submit:hover {
-            background-color: #4adc7f;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin: 30px 0;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--discord-blurple);
-            width: 25%;
-            border-radius: 3px;
-            transition: width 0.5s ease;
-        }
-
-        .section-counter {
-            text-align: center;
-            color: var(--discord-light);
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--discord-light);
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 30px;
-        }
-
-        .required::after {
-            content: " *";
-            color: var(--discord-red);
-        }
-
-        @media (max-width: 768px) {
-            .form-container {
-                flex-direction: column;
-            }
-            
-            .sections-nav {
-                position: static;
-                margin-bottom: 20px;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .section-icon {
-                margin-bottom: 15px;
-            }
-        }
-    </style>
+    /* Responsive */
+    @media (max-width:800px){
+      .grid-2, .grid-3{grid-template-columns:1fr}
+      .progress-bar{width:140px}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-robot"></i>
-            </div>
-            <h1>Bluv Developer Bot Development Form</h1>
-            <p class="subtitle">Complete this form to request a custom Discord bot. Please answer all sections thoroughly to ensure we understand your requirements.</p>
-        </header>
-
-        <div class="progress-bar">
-            <div class="progress" id="progress"></div>
-        </div>
-        <div class="section-counter" id="section-counter">Section 1 of 4</div>
-
-        <div class="form-container">
-            <nav class="sections-nav">
-                <h3>Form Sections</h3>
-                <ul class="nav-list">
-                    <li><a href="#section1" class="nav-link active" data-section="1"><span class="nav-icon"><i class="fas fa-user"></i></span>User Profile</a></li>
-                    <li><a href="#section2" class="nav-link" data-section="2"><span class="nav-icon"><i class="fas fa-robot"></i></span>Bot Specifications</a></li>
-                    <li><a href="#section3" class="nav-link" data-section="3"><span class="nav-icon"><i class="fas fa-server"></i></span>Server Details</a></li>
-                    <li><a href="#section4" class="nav-link" data-section="4"><span class="nav-icon"><i class="fas fa-file-contract"></i></span>Terms & Agreement</a></li>
-                </ul>
-            </nav>
-
-            <div class="form-sections">
-                <!-- Section 1: User Profile -->
-                <section id="section1" class="form-section active">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">👤 User Profile</h2>
-                            <p class="section-desc">Please answer the following so I know who I am working with.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="discord-username" class="required">Discord Username:</label>
-                        <input type="text" id="discord-username" placeholder="e.g., user_name" required>
-                        <span class="label-note">Your current unique username</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="discord-id" class="required">Discord User ID:</label>
-                        <input type="text" id="discord-id" placeholder="e.g., 123456789012345678" required>
-                        <span class="label-note">Right-click your profile with Dev Mode on → Copy ID</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nickname" class="required">Nickname / Preferred Name:</label>
-                        <input type="text" id="nickname" placeholder="What should I call you during our chats?" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="contact-method" class="required">How did we contact you?</label>
-                        <select id="contact-method" required>
-                            <option value="">Select an option</option>
-                            <option value="dm">I DMed you</option>
-                            <option value="ticket">You opened a ticket</option>
-                            <option value="mutual-server">We met in a mutual server</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="found-from" class="required">How did you find me?</label>
-                        <input type="text" id="found-from" placeholder="e.g., Reddit, Discord server, word of mouth" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="timezone" class="required">Timezone:</label>
-                        <input type="text" id="timezone" placeholder="e.g., EST, PST, GMT+2" required>
-                        <span class="label-note">This helps me know when you are awake for testing</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="extra-accounts">Extra / Any other accounts?</label>
-                        <textarea id="extra-accounts" placeholder="Do you have an alt account I should know about, or any other info regarding your contact details?"></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-next" id="next1">Next Section <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </section>
-
-                <!-- Section 2: Bot Specifications -->
-                <section id="section2" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">🤖 Bot Specifications & Features</h2>
-                            <p class="section-desc">Since we handle the hosting and code management for you, please focus on how you want the bot to behave.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bot-name" class="required">Bot Name:</label>
-                        <input type="text" id="bot-name" placeholder="What name should the bot display in your server?" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bot-avatar">Bot Avatar / Icon:</label>
-                        <input type="text" id="bot-avatar" placeholder="Image file or link for the bot's profile picture">
-                        <span class="label-note">If blank, we will pick a default one</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="command-pref" class="required">Command Preference:</label>
-                        <select id="command-pref" required>
-                            <option value="">Select an option</option>
-                            <option value="slash">Slash Commands (/help)</option>
-                            <option value="prefix">Prefix Commands (!help)</option>
-                            <option value="both">Both</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="primary-category" class="required">Primary Category:</label>
-                        <input type="text" id="primary-category" placeholder="e.g., Moderation, Economy, Music, Ticketing, Fun" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="command-list" class="required">Full Command List:</label>
-                        <textarea id="command-list" placeholder="Please list every specific command you need. (e.g., /ban, /kick, /coinflip, /userinfo). Be detailed!" required></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bot-status" class="required">Bot Status / Activity Text:</label>
-                        <input type="text" id="bot-status" placeholder="e.g., 'Playing specific game', 'Watching #general', 'Listening to !help'" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="theme-colors">Theme Colors:</label>
-                        <input type="text" id="theme-colors" placeholder="e.g., Red, Blue, or a Hex Code like #5865F2">
-                        <span class="label-note">When the bot replies with styled boxes (Embeds), what color should they be?</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required">Hosting & Token Configuration:</label>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="hosting-default" checked>
-                            <label for="hosting-default">By default, we host the bot 24/7 and manage the token for you so you don't have to do anything. Is this okay?</label>
-                        </div>
-                        <textarea id="hosting-custom" placeholder="If you strictly require to host the Python script yourself using your own token, state that here." style="margin-top: 10px;"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="admin-roles" class="required">Admin/Mod Role Names:</label>
-                        <input type="text" id="admin-roles" placeholder="e.g., 'Moderator', 'Admin', 'Owner'" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="logging-channels">Logging Channels (Optional):</label>
-                        <input type="text" id="logging-channels" placeholder="Exact name of the channel where logs should be sent">
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-prev" id="prev2"><i class="fas fa-arrow-left"></i> Previous</button>
-                        <button class="btn btn-next" id="next2">Next Section <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </section>
-
-                <!-- Section 3: Server Details -->
-                <section id="section3" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-server"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">🏠 Target Server Details</h2>
-                            <p class="section-desc">Please provide details about the server where the bot will be added.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="server-name" class="required">Server Name:</label>
-                        <input type="text" id="server-name" placeholder="Exact name of the server" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="server-invite" class="required">Server Invite Link:</label>
-                        <input type="text" id="server-invite" placeholder="Permanent invite link for testing/support" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="server-id" class="required">Server ID (Guild ID):</label>
-                        <input type="text" id="server-id" placeholder="Right-click Server Icon → Copy ID" required>
-                        <span class="label-note">Required so I can "lock" the bot to only work in your server if requested</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="member-count" class="required">Member Count:</label>
-                        <select id="member-count" required>
-                            <option value="">Select an option</option>
-                            <option value="<50">Less than 50</option>
-                            <option value="50-100">50-100</option>
-                            <option value="100-500">100-500</option>
-                            <option value="500-1000">500-1000</option>
-                            <option value="1000+">1000+</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="primary-language" class="required">Primary Language:</label>
-                        <input type="text" id="primary-language" placeholder="Main language spoken in the server" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required">Bot Permissions:</label>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="admin-permission">
-                            <label for="admin-permission">Will the bot be given the "Administrator" permission?</label>
-                        </div>
-                        <textarea id="specific-permissions" placeholder="If not, please list the specific permissions it will have (e.g., Manage Messages, Kick Members)" style="margin-top: 10px;"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="nsfw-content" class="required">NSFW / Age-Restricted Content:</label>
-                        <select id="nsfw-content" required>
-                            <option value="">Select an option</option>
-                            <option value="no">No, my server does NOT contain NSFW (18+) channels</option>
-                            <option value="yes">Yes, my server contains NSFW (18+) channels</option>
-                        </select>
-                        <span class="label-note">Important: If yes, I need to mark the bot as "Age-Restricted" in the code settings</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="conflicting-bots">Conflicting Bots:</label>
-                        <textarea id="conflicting-bots" placeholder="Are there other bots doing similar things? (e.g., Do you already have Dyno or MEE6 handling moderation?)"></textarea>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-prev" id="prev3"><i class="fas fa-arrow-left"></i> Previous</button>
-                        <button class="btn btn-next" id="next3">Next Section <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </section>
-
-                <!-- Section 4: Terms of Service -->
-                <section id="section4" class="form-section">
-                    <div class="section-header">
-                        <div class="section-icon">
-                            <i class="fas fa-file-contract"></i>
-                        </div>
-                        <div>
-                            <h2 class="section-title">📜 Terms of Service & Agreement</h2>
-                            <p class="section-desc">Please read carefully. Answering "Yes" confirms you understand the rules of this free service.</p>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="tos-compliance" required>
-                            <label for="tos-compliance" class="required"><strong>Discord TOS Compliance:</strong> Do you agree that this bot will not be used for raiding, spamming, scamming, or breaking Discord's Terms of Service? (Violation = Immediate Shutdown)</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="uptime-disclaimer" required>
-                            <label for="uptime-disclaimer" class="required"><strong>Uptime & Hosting Disclaimer:</strong> I host this bot for free. Do you understand that I cannot guarantee 100% uptime (24/7 access) and the bot may go offline occasionally for maintenance or updates?</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="abuse-policy" required>
-                            <label for="abuse-policy" class="required"><strong>Abuse Policy:</strong> Do you accept that I (Bluv) reserve the right to shut down the bot or leave the server if the bot is being used to harass members or abuse the API?</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="ownership-resale" required>
-                            <label for="ownership-resale" class="required"><strong>Ownership & Resale:</strong> Do you agree not to claim the code as your own work? (You are free to use the bot, but you may not sell the bot or the source code to others)</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="data-privacy" required>
-                            <label for="data-privacy" class="required"><strong>Data & Privacy:</strong> Do you consent to your Server ID and User ID being stored in my database/config files so the bot can function?</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="termination" required>
-                            <label for="termination" class="required"><strong>Termination of Service:</strong> Do you understand that since this is a free service, I reserve the right to stop hosting the bot if I am no longer able to support it?</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="final-signature" class="required">Final Signature:</label>
-                        <input type="text" id="final-signature" placeholder="Type your full Discord Username and today's date" required>
-                        <span class="label-note">To confirm you agree to all the sections above</span>
-                    </div>
-
-                    <div class="form-actions">
-                        <button class="btn btn-prev" id="prev4"><i class="fas fa-arrow-left"></i> Previous</button>
-                        <button class="btn btn-submit" id="submit-form"><i class="fas fa-paper-plane"></i> Submit Form</button>
-                    </div>
-                </section>
-            </div>
-        </div>
-
-        <footer>
-            <p>Bluv Developer Bot Services &copy; <span id="current-year"></span> | This is a free service provided by Bluv Developer</p>
-            <p style="margin-top: 5px; font-size: 0.8rem;">All bots comply with Discord's Terms of Service and API policies.</p>
-        </footer>
+  <header class="app-header">
+    <div class="brand">
+      <div class="logo">🧩</div>
+      <div class="titles">
+        <h1>Bluv — Custom Discord Bot Spec</h1>
+        <p class="subtitle">A complete questionnaire to capture your bot requirements.</p>
+      </div>
     </div>
+    <div class="progress">
+      <div class="progress-bar"><span id="progressFill" style="width: 6%"></span></div>
+      <div class="progress-text"><span id="progressStep">1</span> / <span id="progressTotal">8</span></div>
+    </div>
+  </header>
 
-    <script>
-        // Set current year in footer
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        // Form navigation logic
-        const sections = document.querySelectorAll('.form-section');
-        const navLinks = document.querySelectorAll('.nav-link');
-        const progressBar = document.getElementById('progress');
-        const sectionCounter = document.getElementById('section-counter');
-        let currentSection = 1;
-        const totalSections = 4;
-        
-        // Update progress bar and counter
-        function updateProgress() {
-            const progressPercent = (currentSection / totalSections) * 100;
-            progressBar.style.width = `${progressPercent}%`;
-            sectionCounter.textContent = `Section ${currentSection} of ${totalSections}`;
-            
-            // Update nav links
-            navLinks.forEach(link => {
-                const sectionNum = parseInt(link.getAttribute('data-section'));
-                if (sectionNum === currentSection) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-        }
-        
-        // Show specific section
-        function showSection(sectionNum) {
-            sections.forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            document.getElementById(`section${sectionNum}`).classList.add('active');
-            currentSection = sectionNum;
-            updateProgress();
-            
-            // Scroll to top of form sections
-            document.querySelector('.form-sections').scrollTop = 0;
-        }
-        
-        // Navigation event listeners
-        document.getElementById('next1').addEventListener('click', () => showSection(2));
-        document.getElementById('next2').addEventListener('click', () => showSection(3));
-        document.getElementById('next3').addEventListener('click', () => showSection(4));
-        
-        document.getElementById('prev2').addEventListener('click', () => showSection(1));
-        document.getElementById('prev3').addEventListener('click', () => showSection(2));
-        document.getElementById('prev4').addEventListener('click', () => showSection(3));
-        
-        // Nav links click events
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const sectionNum = parseInt(link.getAttribute('data-section'));
-                showSection(sectionNum);
-            });
-        });
-        
-        // Form submission
-        document.getElementById('submit-form').addEventListener('click', function() {
-            // Check if all required fields in all sections are filled
-            let isValid = true;
-            const requiredFields = document.querySelectorAll('[required]');
-            
-            requiredFields.forEach(field => {
-                if (!field.value || (field.type === 'checkbox' && !field.checked)) {
-                    isValid = false;
-                    field.style.borderColor = 'var(--discord-red)';
-                    
-                    // Scroll to first invalid field
-                    if (isValid === false) {
-                        const section = field.closest('.form-section');
-                        if (section && !section.classList.contains('active')) {
-                            const sectionId = section.id;
-                            const sectionNum = parseInt(sectionId.replace('section', ''));
-                            showSection(sectionNum);
-                        }
-                        field.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        field.focus();
-                        isValid = true; // Prevent checking other fields after we found one
-                    }
-                } else {
-                    field.style.borderColor = '';
-                }
-            });
-            
-            if (isValid) {
-                // In a real application, this would submit to a server
-                alert('Form submitted successfully! Thank you for your submission. Bluv Developer will review your request and contact you shortly.');
-                
-                // Reset form (for demo purposes)
-                document.querySelectorAll('input, textarea, select').forEach(field => {
-                    if (field.type !== 'button' && field.type !== 'submit') {
-                        field.value = '';
-                    }
-                    if (field.type === 'checkbox') {
-                        field.checked = false;
-                    }
-                });
-                
-                // Reset to first section
-                showSection(1);
+  <main class="container">
+    <form id="specForm" novalidate>
+      <!-- Step 1: Audience & Demographics -->
+      <section class="step active" data-step="1" aria-label="Audience & Demographics">
+        <h2>👥 Section 1A: Bot audience and demographics</h2>
+
+        <fieldset>
+          <legend>Target audience analysis</legend>
+
+          <div class="field-group">
+            <label class="label">Primary user base — age group</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="ageGroup" value="13-15">13–15 (Teen)</label>
+              <label><input type="radio" name="ageGroup" value="15-17">15–17 (Young Adult)</label>
+              <label><input type="radio" name="ageGroup" value="17-22">17–22 (College/University)</label>
+              <label><input type="radio" name="ageGroup" value="22-30">22–30 (Young Professional)</label>
+              <label><input type="radio" name="ageGroup" value="30-45">30–45 (Adult)</label>
+              <label><input type="radio" name="ageGroup" value="45+">45+ (Mature)</label>
+              <label><input type="radio" name="ageGroup" value="Mixed/All Ages">Mixed/All Ages</label>
+              <label class="inline">
+                <input type="radio" name="ageGroup" value="Custom">
+                Custom range
+              </label>
+              <div class="inline-fields" data-show-if="ageGroup:Custom">
+                <input type="text" name="ageCustomMin" placeholder="Min age" inputmode="numeric">
+                <input type="text" name="ageCustomMax" placeholder="Max age" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">User technical level</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="techLevel" value="Non-technical">Non-technical</label>
+              <label><input type="checkbox" name="techLevel" value="Intermediate">Intermediate</label>
+              <label><input type="checkbox" name="techLevel" value="Advanced">Advanced</label>
+              <label><input type="checkbox" name="techLevel" value="Developers">Developers</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Regional considerations</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="region" value="North America">North America focused</label>
+              <label><input type="radio" name="region" value="Europe/UK">Europe/UK focused</label>
+              <label><input type="radio" name="region" value="Asia-Pacific">Asia-Pacific focused</label>
+              <label><input type="radio" name="region" value="Global">Global audience</label>
+              <label class="inline">
+                <input type="radio" name="region" value="Specific country">
+                Specific country
+              </label>
+              <input class="inline-input" type="text" name="specificCountry" placeholder="Country name"
+                data-show-if="region:Specific country">
+            </div>
+          </div>
+        </fieldset>
+
+        <h2>📦 Bot distribution and growth</h2>
+        <fieldset>
+          <div class="field-group">
+            <label class="label">Deployment type</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="deployType" value="Private">Private bot</label>
+              <label><input type="checkbox" name="deployType" value="Whitelisted">Whitelisted</label>
+              <label><input type="checkbox" name="deployType" value="Public">Public bot</label>
+              <label><input type="checkbox" name="deployType" value="Enterprise">Enterprise</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Growth expectations</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="growth" value="<5">Small & stable (&lt; 5 servers)</label>
+              <label><input type="radio" name="growth" value="5-50">Growing (5–50 servers)</label>
+              <label><input type="radio" name="growth" value="50-500">Large scale (50–500 servers)</label>
+              <label><input type="radio" name="growth" value="500+">Mass public (500+ servers)</label>
+              <label><input type="radio" name="growth" value="1000+">Viral potential (1000+ servers)</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Scalability requirements</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="scale" value="Light">Light (&lt; 1,000 users)</label>
+              <label><input type="radio" name="scale" value="Medium">Medium (1,000–10,000)</label>
+              <label><input type="radio" name="scale" value="Heavy">Heavy (10,000–100,000)</label>
+              <label><input type="radio" name="scale" value="Enterprise">Enterprise (100,000+)</label>
+              <label><input type="radio" name="scale" value="Unlimited">Unlimited (prepare for viral)</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <h2>🧭 Community management</h2>
+        <fieldset>
+          <div class="field-group">
+            <label class="label">Moderation team — staff structure</label>
+            <div class="grid-3">
+              <div>
+                <span class="sub">Number of admins</span>
+                <select name="admins">
+                  <option>1-3</option><option>4-7</option><option>8+</option>
+                </select>
+              </div>
+              <div>
+                <span class="sub">Number of moderators</span>
+                <select name="moderators">
+                  <option>0</option><option>1-5</option><option>6-20</option><option>20+</option>
+                </select>
+              </div>
+              <div>
+                <span class="sub">Support team size</span>
+                <select name="supportTeam">
+                  <option>None</option><option>Small</option><option>Dedicated Team</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Community type</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="communityType" value="Casual/Social">Casual/Social</label>
+              <label><input type="checkbox" name="communityType" value="Gaming/Competitive">Gaming/Competitive</label>
+              <label><input type="checkbox" name="communityType" value="Educational/Learning">Educational/Learning</label>
+              <label><input type="checkbox" name="communityType" value="Professional/Business">Professional/Business</label>
+              <label><input type="checkbox" name="communityType" value="Support/Help">Support/Help</label>
+              <label><input type="checkbox" name="communityType" value="Fan/Content Creator">Fan/Content Creator</label>
+              <label class="inline"><input type="checkbox" name="communityType" value="Other">Other</label>
+              <input class="inline-input" type="text" name="communityOther" placeholder="Describe"
+                data-show-if="communityType:Other">
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="nav">
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 2: Growth & Expansion Planning -->
+      <section class="step" data-step="2" aria-label="Growth & Expansion">
+        <h2>🚀 Section 1B: Growth and expansion planning</h2>
+
+        <fieldset>
+          <legend>Future development roadmap</legend>
+
+          <div class="field-group">
+            <label class="label">Phase 1 (Launch)</label>
+            <textarea name="phase1Features" rows="3" placeholder="Must-have features"></textarea>
+            <div class="pill-grid">
+              <label><input type="radio" name="phase1Timeline" value="1-2 weeks">1–2 weeks</label>
+              <label><input type="radio" name="phase1Timeline" value="3-4 weeks">3–4 weeks</label>
+              <label><input type="radio" name="phase1Timeline" value="1-2 months">1–2 months</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Phase 2 (Expansion)</label>
+            <textarea name="phase2Features" rows="3" placeholder="Additional features"></textarea>
+            <div class="pill-grid">
+              <label><input type="radio" name="phase2Timeline" value="1 month">1 month after launch</label>
+              <label><input type="radio" name="phase2Timeline" value="3 months">3 months</label>
+              <label><input type="radio" name="phase2Timeline" value="6 months">6 months</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Phase 3 (Advanced)</label>
+            <textarea name="phase3Features" rows="3" placeholder="Premium features"></textarea>
+            <div class="pill-grid">
+              <label><input type="radio" name="phase3Timeline" value="6 months">6 months</label>
+              <label><input type="radio" name="phase3Timeline" value="1 year">1 year</label>
+              <label><input type="radio" name="phase3Timeline" value="Future consideration">Future consideration</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Monetization strategy</legend>
+          <div class="field-group">
+            <label class="label">Revenue models</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="revenue" value="No Monetization">No Monetization</label>
+              <label><input type="checkbox" name="revenue" value="Optional Donations">Optional Donations</label>
+              <label><input type="checkbox" name="revenue" value="Premium Features">Premium Features</label>
+              <label><input type="checkbox" name="revenue" value="Subscription Tier">Subscription Tier</label>
+              <label><input type="checkbox" name="revenue" value="One-time Purchase">One-time Purchase</label>
+              <label><input type="checkbox" name="revenue" value="Commission-based">Commission-based</label>
+              <label><input type="checkbox" name="revenue" value="Sponsorship/Ads">Sponsorship/Ads</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Premium features consideration</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="premium" value="VIP roles">VIP roles with special commands</label>
+              <label><input type="checkbox" name="premium" value="Customizable features">Customizable features for donors</label>
+              <label><input type="checkbox" name="premium" value="Early access">Early access to new features</label>
+              <label><input type="checkbox" name="premium" value="Priority support">Priority support</label>
+              <label><input type="checkbox" name="premium" value="Custom commands">Custom command creation</label>
+              <label><input type="checkbox" name="premium" value="Analytics dashboard">Analytics dashboard</label>
+              <label><input type="checkbox" name="premium" value="API access">API access for developers</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 3: Marketing & Discovery -->
+      <section class="step" data-step="3" aria-label="Marketing & Discovery">
+        <h2>📣 Marketing and discovery</h2>
+
+        <fieldset>
+          <legend>Bot listing requirements</legend>
+          <div class="pill-grid">
+            <label><input type="checkbox" name="botLists" value="top.gg">top.gg</label>
+            <label><input type="checkbox" name="botLists" value="discord.bots.gg">discord.bots.gg</label>
+            <label><input type="checkbox" name="botLists" value="discords.com/bots">discords.com/bots</label>
+            <label><input type="checkbox" name="botLists" value="botlist.me">botlist.me</label>
+            <label><input type="checkbox" name="botLists" value="All major bot lists">All major bot lists</label>
+            <label><input type="checkbox" name="botLists" value="Custom listing page">Custom listing page</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Marketing materials needed</legend>
+          <div class="pill-grid">
+            <label><input type="checkbox" name="marketing" value="Icon">Professional bot icon (512x512)</label>
+            <label><input type="checkbox" name="marketing" value="Banner">Banner image (1920x1080)</label>
+            <label><input type="checkbox" name="marketing" value="Feature images">Feature showcase images</label>
+            <label><input type="checkbox" name="marketing" value="Demo video">Demo video (1–2 minutes)</label>
+            <label><input type="checkbox" name="marketing" value="Docs">Documentation website</label>
+            <label><input type="checkbox" name="marketing" value="Press kit">Press kit</label>
+            <label><input type="checkbox" name="marketing" value="Social assets">Social media assets</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>SEO & discovery</legend>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="label" for="keywords">Desired keywords</label>
+              <input id="keywords" name="keywords" type="text" placeholder="e.g., Discord moderation, music bot">
+            </div>
+            <div class="field-group">
+              <label class="label" for="tagline">Tagline (max 150 chars)</label>
+              <input id="tagline" name="tagline" type="text" maxlength="150" placeholder="Short, punchy value proposition">
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="label" for="botDescription">Bot description for listings</label>
+            <textarea id="botDescription" name="botDescription" rows="4" placeholder="Compelling description"></textarea>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Search tags</label>
+            <div class="pill-grid" data-tags>
+              <label><input type="checkbox" name="searchTags" value="moderation">moderation</label>
+              <label><input type="checkbox" name="searchTags" value="music">music</label>
+              <label><input type="checkbox" name="searchTags" value="utility">utility</label>
+              <label><input type="checkbox" name="searchTags" value="fun">fun</label>
+              <label><input type="checkbox" name="searchTags" value="economy">economy</label>
+              <label><input type="checkbox" name="searchTags" value="games">games</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 4: Security & Compliance -->
+      <section class="step" data-step="4" aria-label="Security & Compliance">
+        <h2>🔐 Section 1C: Security and compliance</h2>
+
+        <fieldset>
+          <legend>Data protection level</legend>
+          <div class="field-group">
+            <label class="label">GDPR/Privacy compliance — data collection</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="dataCollection" value="Minimal">Minimal (User IDs only)</label>
+              <label><input type="radio" name="dataCollection" value="Standard">Standard (IDs, command usage)</label>
+              <label><input type="radio" name="dataCollection" value="Advanced">Advanced (Analytics, behavior)</label>
+              <label><input type="radio" name="dataCollection" value="Full">Full (Messages, for moderation)</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">User rights</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="userRights" value="Delete data">Right to delete data</label>
+              <label><input type="checkbox" name="userRights" value="Data export">Data export functionality</label>
+              <label><input type="checkbox" name="userRights" value="Privacy policy">Privacy policy page</label>
+              <label><input type="checkbox" name="userRights" value="Cookie consent">Cookie consent system</label>
+              <label><input type="checkbox" name="userRights" value="Age verification">Age verification system</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Security features — protection systems</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="security" value="DDoS">DDoS protection</label>
+              <label><input type="checkbox" name="security" value="Rate limiting">Rate limiting per IP/user</label>
+              <label><input type="checkbox" name="security" value="SQLi">SQL injection prevention</label>
+              <label><input type="checkbox" name="security" value="XSS">XSS protection</label>
+              <label><input type="checkbox" name="security" value="API key encryption">API key encryption</label>
+              <label><input type="checkbox" name="security" value="2FA">Two-factor auth for dashboard</label>
+              <label><input type="checkbox" name="security" value="Audit logs">Audit logs for all actions</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Backup & recovery</label>
+            <div class="grid-3">
+              <div>
+                <span class="sub">Backup frequency</span>
+                <select name="backupFrequency">
+                  <option>Hourly</option><option>Daily</option><option>Weekly</option>
+                </select>
+              </div>
+              <div>
+                <span class="sub">Retention period</span>
+                <select name="retentionPeriod">
+                  <option>7 days</option><option>30 days</option><option>90 days</option><option>365 days</option>
+                </select>
+              </div>
+              <div>
+                <span class="sub">Disaster recovery plan</span>
+                <select name="drPlan">
+                  <option>Basic</option><option>Advanced</option><option>Enterprise</option>
+                </select>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="label">Data export format</label>
+              <div class="pill-grid">
+                <label><input type="radio" name="exportFormat" value="JSON">JSON</label>
+                <label><input type="radio" name="exportFormat" value="CSV">CSV</label>
+                <label><input type="radio" name="exportFormat" value="SQL">SQL</label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Legal & compliance</legend>
+          <div class="field-group">
+            <label class="label">Required legal documents</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="legalDocs" value="Privacy Policy">Privacy Policy</label>
+              <label><input type="checkbox" name="legalDocs" value="Terms of Service">Terms of Service</label>
+              <label><input type="checkbox" name="legalDocs" value="Acceptable Use Policy">Acceptable Use Policy</label>
+              <label><input type="checkbox" name="legalDocs" value="Cookie Policy">Cookie Policy</label>
+              <label><input type="checkbox" name="legalDocs" value="DMCA">DMCA Takedown Procedure</label>
+              <label><input type="checkbox" name="legalDocs" value="DPA">Data Processing Agreement (if EU users)</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Age restrictions</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="ageRestriction" value="13+">All ages (13+ per Discord ToS)</label>
+              <label><input type="radio" name="ageRestriction" value="16+">16+ (GDPR compliance)</label>
+              <label><input type="radio" name="ageRestriction" value="18+">18+ (Adult content)</label>
+              <label><input type="radio" name="ageRestriction" value="21+">21+ (Restricted regions)</label>
+              <label><input type="checkbox" name="ageVerification" value="Required">Age verification required</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Content moderation</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="moderation" value="Profanity filter">Automated profanity filter</label>
+              <label><input type="checkbox" name="moderation" value="Image scanning">Image scanning (explicit content)</label>
+              <label><input type="checkbox" name="moderation" value="Report system">Report system for users</label>
+              <label><input type="checkbox" name="moderation" value="Appeal process">Appeal process for bans</label>
+              <label><input type="checkbox" name="moderation" value="Human review">Human review queue</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 5: Web Dashboard -->
+      <section class="step" data-step="5" aria-label="Web Dashboard">
+        <h2>📱 Section 7A: Multi-platform integration — web dashboard features</h2>
+
+        <fieldset>
+          <legend>Dashboard requirements</legend>
+          <div class="field-group">
+            <label class="label">Access level</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="dashboardAccess" value="Admin-only">Admin-only dashboard</label>
+              <label><input type="checkbox" name="dashboardAccess" value="Public status">Public status page</label>
+              <label><input type="checkbox" name="dashboardAccess" value="User profiles">User profiles (economy)</label>
+              <label><input type="checkbox" name="dashboardAccess" value="Server config">Server configuration panel</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Dashboard features</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="dashboardFeatures" value="Real-time stats">Real-time statistics</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Usage graphs">Live command usage graphs</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Member analytics">Server member analytics</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Performance monitoring">Bot performance monitoring</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Config wizard">Configuration wizard</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Command tester">Command tester</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Log viewer">Log viewer</label>
+              <label><input type="checkbox" name="dashboardFeatures" value="Backup manager">Backup manager</label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="label">Mobile compatibility</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="mobile" value="Responsive">Responsive web dashboard</label>
+              <label><input type="checkbox" name="mobile" value="PWA">PWA (Progressive Web App)</label>
+              <label><input type="checkbox" name="mobile" value="Native app">iOS/Android app (additional cost)</label>
+              <label><input type="checkbox" name="mobile" value="Discord optimized">Discord mobile optimized</label>
+              <label><input type="checkbox" name="mobile" value="Push notifications">Push notifications</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>API & developer access</legend>
+          <div class="field-group">
+            <label class="label">External integration — API access level</label>
+            <div class="pill-grid">
+              <label><input type="radio" name="apiAccess" value="None">No external API</label>
+              <label><input type="radio" name="apiAccess" value="Read-only">Read-only API</label>
+              <label><input type="radio" name="apiAccess" value="REST">Full REST API</label>
+              <label><input type="radio" name="apiAccess" value="WebSocket">WebSocket real-time API</label>
+              <label><input type="checkbox" name="webhookSupport" value="Webhook support">Webhook support</label>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="label">Developer features</label>
+            <div class="pill-grid">
+              <label><input type="checkbox" name="devFeatures" value="API docs">API documentation</label>
+              <label><input type="checkbox" name="devFeatures" value="Sandbox">Sandbox/test environment</label>
+              <label><input type="checkbox" name="devFeatures" value="Rate limits">Rate limit information</label>
+              <label><input type="checkbox" name="devFeatures" value="SDKs">SDK/Libraries (Python/JS)</label>
+              <label><input type="checkbox" name="devFeatures" value="Webhook builder">Webhook builder</label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 6: Attachments -->
+      <section class="step" data-step="6" aria-label="Attachments">
+        <h2>📎 Attachments and assets</h2>
+        <p class="hint">Upload logos, banners, or docs (optional). This demo does not actually upload files.</p>
+        <div class="upload">
+          <input type="file" multiple aria-label="Upload assets">
+        </div>
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 7: Contact -->
+      <section class="step" data-step="7" aria-label="Contact">
+        <h2>📇 Contact details</h2>
+        <div class="grid-2">
+          <div class="field-group">
+            <label class="label" for="company">Company / Studio</label>
+            <input id="company" name="company" type="text" placeholder="Bluv or client name" required>
+          </div>
+          <div class="field-group">
+            <label class="label" for="contactName">Primary contact</label>
+            <input id="contactName" name="contactName" type="text" placeholder="Name" required>
+          </div>
+          <div class="field-group">
+            <label class="label" for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="name@domain.com" required>
+          </div>
+          <div class="field-group">
+            <label class="label" for="discord">Discord handle</label>
+            <input id="discord" name="discord" type="text" placeholder="@username">
+          </div>
+        </div>
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="button" class="btn next">Next</button>
+        </div>
+      </section>
+
+      <!-- Step 8: Review & Submit -->
+      <section class="step" data-step="8" aria-label="Review">
+        <h2>✅ Review & submit</h2>
+        <div id="review" class="review"></div>
+        <div class="nav">
+          <button type="button" class="btn prev">Back</button>
+          <button type="submit" class="btn primary">Submit specification</button>
+        </div>
+      </section>
+    </form>
+  </main>
+
+  <footer class="app-footer">
+    <small>Made with care for Discord creators — Bluv</small>
+    <button class="btn ghost" id="resetForm">Reset</button>
+  </footer>
+
+  <script>
+    (function(){
+      const form = document.getElementById('specForm');
+      const steps = Array.from(document.querySelectorAll('.step'));
+      const nextBtns = Array.from(document.querySelectorAll('.btn.next'));
+      const prevBtns = Array.from(document.querySelectorAll('.btn.prev'));
+      const progressFill = document.getElementById('progressFill');
+      const progressStep = document.getElementById('progressStep');
+      const progressTotal = document.getElementById('progressTotal');
+      const resetBtn = document.getElementById('resetForm');
+      const reviewBox = document.getElementById('review');
+
+      let current = 0;
+      progressTotal.textContent = steps.length;
+
+      // Restore from localStorage
+      const KEY = 'bluvDiscordSpec';
+      const saved = localStorage.getItem(KEY);
+      if (saved){
+        const data = JSON.parse(saved);
+        Object.entries(data).forEach(([name, value])=>{
+          const els = form.elements[name];
+          if (!els) return;
+          if (els instanceof RadioNodeList){
+            if (Array.isArray(value)){
+              Array.from(els).forEach(el=>{ el.checked = value.includes(el.value); });
             } else {
-                alert('Please fill in all required fields before submitting.');
+              Array.from(els).forEach(el=>{ el.checked = el.value === value; });
             }
+          } else if (els.length && els[0].type === 'checkbox'){
+            Array.from(els).forEach(el=>{ el.checked = Array.isArray(value) && value.includes(el.value); });
+          } else {
+            els.value = value;
+          }
         });
-        
-        // Initialize progress
-        updateProgress();
-    </script>
+      }
+
+      // Conditional show-if logic
+      function updateConditional(){
+        document.querySelectorAll('[data-show-if]').forEach(el=>{
+          const cond = el.getAttribute('data-show-if'); // e.g., "ageGroup:Custom"
+          const [name, val] = cond.split(':');
+          const group = form.elements[name];
+          let show = false;
+          if (group instanceof RadioNodeList){
+            show = group.value === val;
+          } else if (group && group.length){
+            show = Array.from(group).some(e => e.checked && e.value === val);
+          }
+          el.style.display = show ? (el.classList.contains('inline-input') ? 'inline-block' : 'flex') : 'none';
+        });
+      }
+      form.addEventListener('change', updateConditional);
+      updateConditional();
+
+      // Persist to localStorage
+      function serialize(){
+        const data = {};
+        Array.from(form.elements).forEach(el=>{
+          if (!el.name) return;
+          if (el.type === 'checkbox'){
+            data[el.name] = data[el.name] || [];
+            if (el.checked) data[el.name].push(el.value);
+          } else if (el.type === 'radio'){
+            if (el.checked) data[el.name] = el.value;
+          } else {
+            data[el.name] = el.value;
+          }
+        });
+        localStorage.setItem(KEY, JSON.stringify(data));
+        return data;
+      }
+      form.addEventListener('input', serialize);
+      form.addEventListener('change', serialize);
+
+      // Navigation
+      function showStep(i){
+        steps[current].classList.remove('active');
+        current = Math.max(0, Math.min(i, steps.length-1));
+        steps[current].classList.add('active');
+        const pct = Math.round(((current+1)/steps.length)*100);
+        progressFill.style.width = pct + '%';
+        progressStep.textContent = (current+1).toString();
+        updateConditional();
+        window.scrollTo({top:0, behavior:'smooth'});
+      }
+
+      nextBtns.forEach(btn=>btn.addEventListener('click', ()=>{
+        if (!validateStep(current)) return;
+        showStep(current+1);
+      }));
+      prevBtns.forEach(btn=>btn.addEventListener('click', ()=> showStep(current-1)));
+      resetBtn.addEventListener('click', ()=>{
+        localStorage.removeItem(KEY);
+        form.reset();
+        updateConditional();
+        showStep(0);
+      });
+
+      // Basic validation
+      const requiredFieldsByStep = {
+        6: ['company','contactName','email'] // step index 6 (Contact)
+      };
+
+      function validateStep(index){
+        const required = requiredFieldsByStep[index] || [];
+        let ok = true;
+        required.forEach(name=>{
+          const el = form.elements[name];
+          if (!el) return;
+          const valid = el.value && String(el.value).trim().length > 0;
+          el.setAttribute('aria-invalid', valid ? 'false' : 'true');
+          ok = ok && valid;
+        });
+        return ok;
+      }
+
+      // Review generation
+      function generateReview(){
+        const data = serialize();
+        const lines = Object.entries(data).map(([k,v])=>{
+          const val = Array.isArray(v) ? v.join(', ') : v;
+          return `• ${k}: ${val}`;
+        });
+        reviewBox.textContent = lines.join('\n');
+      }
+
+      // Populate review on entering final step
+      const observer = new MutationObserver(()=>{
+        if (steps[current].dataset.step === '8') generateReview();
+      });
+      observer.observe(document.querySelector('main'), {subtree:true, attributes:true, attributeFilter:['class']});
+
+      // Submit
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const payload = serialize();
+        alert('Specification captured! Check console for data.');
+        console.log('Bluv Discord Spec:', payload);
+        // TODO: Replace with your endpoint
+        // fetch('/submit', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+        //   .then(r=>r.json()).then(()=> alert('Submitted!'));
+      });
+
+      // Keyboard nav
+      document.addEventListener('keydown',(e)=>{
+        if (e.key === 'ArrowRight') showStep(current+1);
+        if (e.key === 'ArrowLeft') showStep(current-1);
+      });
+    })();
+  </script>
 </body>
 </html>
