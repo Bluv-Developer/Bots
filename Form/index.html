@@ -542,6 +542,54 @@
         </div>
     </footer>
 
+    <!-- Legal Modal -->
+    <div id="legalModal" class="fixed inset-0 z-[150] hidden bg-earth-900/90 backdrop-blur-sm items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg p-8 rounded-2xl border border-tan-accent/30 relative shadow-2xl">
+            <div id="legal-step-1">
+                <div class="text-center mb-6">
+                    <i class="fas fa-file-contract text-4xl text-tan-accent mb-4 animate-float"></i>
+                    <h2 class="text-2xl font-bold text-white mb-2">Final Check</h2>
+                    <p class="text-earth-300 text-sm">Wait, before submitting, do you agree to our Terms, Privacy Policy, and any applicable rules or legal documents?</p>
+                </div>
+                
+                <div class="flex gap-4 justify-center mb-8">
+                    <a href="https://bluv-developer.github.io/Bots/Terms" target="_blank" class="text-xs text-tan-accent border border-tan-accent/50 px-3 py-2 rounded hover:bg-tan-accent hover:text-earth-900 transition-colors">
+                        <i class="fas fa-external-link-alt mr-1"></i> Terms of Service
+                    </a>
+                    <a href="https://bluv-developer.github.io/Bots/Privacy" target="_blank" class="text-xs text-tan-accent border border-tan-accent/50 px-3 py-2 rounded hover:bg-tan-accent hover:text-earth-900 transition-colors">
+                        <i class="fas fa-external-link-alt mr-1"></i> Privacy Policy
+                    </a>
+                </div>
+
+                <div class="flex gap-4 justify-center">
+                    <button onclick="handleLegalNo()" class="px-6 py-3 rounded-xl border border-earth-600 text-earth-400 hover:text-white hover:border-earth-400 transition-colors text-sm font-bold">
+                        No, I need to review
+                    </button>
+                    <button onclick="finalSubmit()" class="px-6 py-3 rounded-xl bg-tan-accent text-earth-900 hover:bg-white transition-colors text-sm font-bold shadow-lg shadow-tan-accent/20">
+                        Yes, I Agree
+                    </button>
+                </div>
+            </div>
+
+            <div id="legal-step-2" class="hidden text-center">
+                <i class="fas fa-clock text-4xl text-earth-400 mb-4"></i>
+                <h3 class="text-xl font-bold text-white mb-2">Take your time</h3>
+                <p class="text-earth-300 text-sm mb-6 leading-relaxed">
+                    Sorry, please do not close this tab. We will wait for you to review the documents and information. All current information will be saved.
+                </p>
+                
+                <div class="flex flex-col gap-3 items-center mb-8">
+                     <a href="https://bluv-developer.github.io/Bots/Terms" target="_blank" class="text-tan-accent hover:underline text-sm">Read Terms of Service</a>
+                     <a href="https://bluv-developer.github.io/Bots/Privacy" target="_blank" class="text-tan-accent hover:underline text-sm">Read Privacy Policy</a>
+                </div>
+
+                <button onclick="resetLegalModal()" class="px-8 py-3 rounded-xl bg-earth-700 text-white hover:bg-earth-600 transition-colors text-sm font-bold">
+                    I have reviewed them
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Full Page Success Screen -->
     <div id="successScreen" class="fixed inset-0 z-[200] hidden bg-earth-900 flex-col items-center justify-start md:justify-center p-6 overflow-y-auto">
         <div class="max-w-4xl w-full bg-earth-800/50 border border-tan-accent/20 p-8 md:p-12 rounded-3xl shadow-2xl relative mt-10 md:mt-0 mb-20">
@@ -1018,8 +1066,43 @@
             return prefix + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
         }
 
-        // --- Webhook Submission ---
-        async function submitToWebhook() {
+        // --- Legal Modal Logic ---
+        function submitToWebhook() {
+            // First, trigger HTML5 validation on Step 5 fields
+            const currentPanel = document.getElementById(`step-5`);
+            const inputs = currentPanel.querySelectorAll('input, select, textarea');
+            let valid = true;
+            inputs.forEach(input => {
+                if (input.offsetParent !== null && !input.checkValidity()) { 
+                    input.classList.add('input-error');
+                    valid = false;
+                    input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
+                }
+            });
+            
+            if (!valid) return;
+
+            // Open Modal
+            document.getElementById('legalModal').classList.remove('hidden');
+            document.getElementById('legalModal').classList.add('flex');
+        }
+
+        function handleLegalNo() {
+            document.getElementById('legal-step-1').classList.add('hidden');
+            document.getElementById('legal-step-2').classList.remove('hidden');
+        }
+
+        function resetLegalModal() {
+            document.getElementById('legal-step-2').classList.add('hidden');
+            document.getElementById('legal-step-1').classList.remove('hidden');
+        }
+
+        // --- Final Submission ---
+        async function finalSubmit() {
+            // Hide modal, show loading on button (behind modal basically)
+            document.getElementById('legalModal').classList.add('hidden');
+            document.getElementById('legalModal').classList.remove('flex');
+            
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
             btn.disabled = true;
