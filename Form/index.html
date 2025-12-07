@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluv Developer | Bot Request Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS VARIABLES (Discord Palette) --- */
+        :root {
+            --bg-body: #23272a;       /* Very Dark */
+            --bg-card: #2c2f33;       /* Dark Gray */
+            --bg-input: #23272a;      /* Input Background */
+            --accent: #5865F2;        /* Discord Blurple */
+            --accent-hover: #4752c4;
+            --text-main: #ffffff;
+            --text-muted: #99aab5;
+            --border: #23272a;
+            --danger: #ed4245;
+            --success: #3ba55c;
+        }
+
+        /* --- GLOBAL RESET --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* --- HEADER & HERO --- */
+        header {
+            background: linear-gradient(135deg, #5865F2 0%, #404EED 100%);
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* --- FORM SECTIONS --- */
+        .form-section {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section-header i {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-right: 15px;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        /* --- INPUTS --- */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #dedede;
+        }
+
+        .sub-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-input);
+            border: 2px solid transparent;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.25);
+        }
+
+        /* --- CHECKBOX STYLING --- */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 6px;
+        }
+
+        .checkbox-group input {
+            margin-top: 5px;
+            margin-right: 15px;
+            transform: scale(1.2);
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        /* --- SUBMIT BUTTON --- */
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(59, 165, 92, 0.4);
+        }
+
+        .btn-submit:hover {
+            background-color: #2f8e4d;
+            transform: translateY(-2px);
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="color"] {
+            height: 48px;
+            width: 60px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+            .form-section { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1>Bluv Developer</h1>
+            <p>Bot Development Request Form</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <form onsubmit="event.preventDefault(); alert('Form Submitted! (This is a demo)');">
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fa-solid fa-user"></i>
+                    <h2>Section 1: User Profile</h2>
+                </div>
+                <p class="section-desc">Please answer the following so I know who I am working with.</p>
+
+                <div class="form-group">
+                    <label>Discord Username</label>
+                    <span class="sub-label">What is your current unique username? (e.g. user_name)</span>
+                    <input type="text" name="discord_username" placeholder="user_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Discord User ID</label>
+                    <span class="sub-label">Right-click your profile with Dev Mode on -> Copy ID.</span>
+                    <input type="text" name="discord_id" placeholder="123456789012345678" pattern="\d+" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Nickname / Preferred Name</label>
+                    <span class="sub-label">What should I call you during our chats?</span>
+                    <input type="text" name="nickname" required>
+                </div>
+
+                <div class="form-group">
+                    <label>How did we contact you?</label>
+                    <select name="contact_method">
+                        <option value="dm">You DM'd me</option>
+                        <option value="ticket">I opened a Ticket</option>
+                        <option value="server">Met in a Mutual Server</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>How did you find me?</label>
+                    <input type="text" name="referral" placeholder="Reddit, Server Ad, Word of Mouth...">
+                </div>
+
+                <div class="form-group">
+                    <label>Timezone</label>
+                    <span class="sub-label">Helps me know when you are awake for testing.</span>
+                    <input type="text" name="timezone" placeholder="EST, GMT, UTC+1..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Extra / Any other accounts?</label>
+                    <textarea name="extra_accounts" placeholder="Do you have an alt account I should know about?"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section" style="border-left-color: #FEE75C;"> <div class="section-header">
+                    <i class="fa-solid fa-robot" style="color: #FEE75C;"></i>
+                    <h2>Section 2: Bot Specifications</h2>
+                </div>
+                <p class="section-desc">Since we handle the hosting, focus on how you want the bot to behave.</p>
+
+                <div class="form-group">
+                    <label>Bot Name</label>
+                    <input type="text" name="bot_name" placeholder="MyCoolBot" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Bot Avatar / Icon URL</label>
+                    <span class="sub-label">Link to an image. If blank, we pick a default.</span>
+                    <input type="text" name="bot_avatar" placeholder="https://imgur.com/...">
+                </div>
+
+                <div class="form-group">
+                    <label>Command Preference</label>
+                    <select name="command_pref">
+                        <option value="slash">Slash Commands (/help) - Recommended</option>
+                        <option value="prefix">Prefix Commands (!help)</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Primary Category</label>
+                    <input type="text" name="category" placeholder="Moderation, Economy, Music, Ticketing...">
+                </div>
+
+                <div class="form-group">
+                    <label>Full Command List</label>
+                    <span class="sub-label">List every specific command you need. Be detailed!</span>
+                    <textarea name="command_list" style="height: 150px;" placeholder="/ban, /kick, /coinflip - explain what they do here." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Bot Status / Activity Text</label>
+                    <input type="text" name="bot_status" placeholder="Playing Minecraft | Watching #general">
+                </div>
+
+                <div class="form-group">
+                    <label>Theme Colors</label>
+                    <span class="sub-label">Select the color for bot Embeds.</span>
+                    <div class="color-picker-wrapper">
+                        <input type="color" name="embed_color_picker" value="#5865F2">
+                        <input type="text" name="embed_color_text" placeholder="#5865F2 or Red">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Hosting Configuration</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" name="hosting_agree" checked>
+                        <label>I agree to let Bluv host the bot 24/7. (Uncheck if you require self-hosting).</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Admin/Mod Role Names</label>
+                    <input type="text" name="mod_roles" placeholder="Moderator, Admin, Owner">
+                </div>
+
+                <div class="form-group">
+                    <label>Logging Channels (Optional)</label>
+                    <input type="text" name="log_channel" placeholder="#mod-logs">
+                </div>
+            </div>
+
+            <div class="form-section" style="border-left-color: #EB459E;"> <div class="section-header">
+                    <i class="fa-solid fa-house" style="color: #EB459E;"></i>
+                    <h2>Section 3: Target Server</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Server Name</label>
+                    <input type="text" name="server_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Server Invite Link</label>
+                    <span class="sub-label">Permanent link so I can join for testing.</span>
+                    <input type="text" name="invite_link" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Server ID (Guild ID)</label>
+                    <span class="sub-label">Right-click Server Icon -> Copy ID.</span>
+                    <input type="text" name="guild_id" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Member Count</label>
+                    <select name="member_count">
+                        <option value="<50">&lt; 50 Members</option>
+                        <option value="50-100">50 - 100 Members</option>
+                        <option value="100-1000">100 - 1,000 Members</option>
+                        <option value="1000+">1,000+ Members</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Primary Language</label>
+                    <input type="text" name="language" placeholder="English">
+                </div>
+
+                <div class="form-group">
+                    <label>Bot Permissions</label>
+                    <span class="sub-label">Will the bot have Administrator? If no, list perms.</span>
+                    <input type="text" name="permissions" placeholder="Administrator">
+                </div>
+
+                <div class="form-group">
+                    <label>NSFW / Age-Restricted Content</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" name="nsfw_flag">
+                        <label>Yes, my server contains NSFW (18+) channels.</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Conflicting Bots</label>
+                    <input type="text" name="other_bots" placeholder="Are MEE6 or Dyno already doing similar things?">
+                </div>
+            </div>
+
+            <div class="form-section" style="border-left-color: #ED4245;"> <div class="section-header">
+                    <i class="fa-solid fa-file-contract" style="color: #ED4245;"></i>
+                    <h2>Section 4: Terms of Service</h2>
+                </div>
+                <p class="section-desc">Please read carefully. Answering the boxes below confirms you understand the rules of this free service.</p>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Discord TOS Compliance:</strong> I agree that this bot will not be used for raiding, spamming, scamming, or breaking Discord's Terms of Service.</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Uptime Disclaimer:</strong> I understand that this is a free service and 100% uptime cannot be guaranteed during maintenance.</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Abuse Policy:</strong> I accept that Bluv reserves the right to shut down the bot if it is used to harass members or abuse the API.</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Ownership:</strong> I agree not to claim the code as my own, nor sell the bot/source code to others.</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Data & Privacy:</strong> I consent to my Server ID and User ID being stored in config files so the bot can function.</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" required>
+                    <label><strong>Termination:</strong> I understand that Bluv reserves the right to stop hosting the bot if no longer able to support it.</label>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Final Signature</label>
+                    <span class="sub-label">Type your full Discord Username and today's date to confirm.</span>
+                    <input type="text" name="signature" placeholder="Username - MM/DD/YYYY" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Request</button>
+
+        </form>
+    </div>
+
+</body>
+</html>
