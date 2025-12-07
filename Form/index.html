@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
         tailwind.config = {
@@ -48,7 +50,6 @@
     <style>
         body {
             background-color: #0f1115;
-            /* Radial gradient at the bottom center creating the "half circle" glow effect */
             background-image: radial-gradient(circle at 50% 100%, rgba(88, 101, 242, 0.25) 0%, rgba(15, 17, 21, 0) 60%);
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -99,21 +100,27 @@
             color: white;
             border-color: #5865F2;
         }
-        .progress-step.completed {
-            background-color: #5865F2;
-            color: white;
-            border-color: #5865F2;
-        }
         
-        .progress-line {
-            transition: width 0.3s ease;
+        /* Command Card Styling */
+        .command-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+        .command-card:hover {
+            border-color: rgba(88, 101, 242, 0.5);
+        }
+
+        /* Success Screen */
+        #successScreen {
+            display: none;
         }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center p-4 selection:bg-bluv-500 selection:text-white">
 
-    <!-- Header / Breadcrumb -->
-    <header class="w-full max-w-4xl mb-8 flex flex-col items-center text-center pt-8 animate-fade-in">
+    <!-- Header / Breadcrumb (Hidden on Success) -->
+    <header id="mainHeader" class="w-full max-w-4xl mb-8 flex flex-col items-center text-center pt-8 animate-fade-in">
         <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Logo" class="w-20 h-20 mb-4 drop-shadow-[0_0_15px_rgba(88,101,242,0.5)]">
         
         <div class="flex items-center gap-2 text-gray-500 text-sm font-semibold tracking-wide uppercase mb-2">
@@ -128,28 +135,24 @@
         <p class="text-gray-400">Let's build your ideal Discord bot.</p>
     </header>
 
-    <!-- Progress Indicator -->
-    <div class="w-full max-w-4xl mb-8 px-4 relative">
+    <!-- Progress Indicator (Hidden on Success) -->
+    <div id="progressContainer" class="w-full max-w-4xl mb-8 px-4 relative">
         <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-800 -z-10 rounded"></div>
         <div class="absolute top-1/2 left-0 h-1 bg-blue-500 -z-10 rounded transition-all duration-300" id="progressBar" style="width: 0%"></div>
         
         <div class="flex justify-between items-center w-full">
-            <!-- Step 1 Indicator -->
             <div class="flex flex-col items-center gap-2">
                 <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500 active" id="ind1">1</div>
                 <span class="text-xs text-gray-400 font-medium hidden md:block">Profile</span>
             </div>
-             <!-- Step 2 Indicator -->
              <div class="flex flex-col items-center gap-2">
                 <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind2">2</div>
                 <span class="text-xs text-gray-400 font-medium hidden md:block">Specs</span>
             </div>
-             <!-- Step 3 Indicator -->
              <div class="flex flex-col items-center gap-2">
                 <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind3">3</div>
                 <span class="text-xs text-gray-400 font-medium hidden md:block">Server</span>
             </div>
-             <!-- Step 4 Indicator -->
              <div class="flex flex-col items-center gap-2">
                 <div class="progress-step w-10 h-10 rounded-full border-2 border-gray-700 bg-[#0f1115] flex items-center justify-center font-bold text-gray-500" id="ind4">4</div>
                 <span class="text-xs text-gray-400 font-medium hidden md:block">TOS</span>
@@ -158,7 +161,7 @@
     </div>
 
     <!-- Main Form Container -->
-    <main class="w-full max-w-4xl relative pb-24">
+    <main id="formMain" class="w-full max-w-4xl relative pb-24">
         <form id="botForm" onsubmit="return false;">
             
             <!-- STEP 1: User Profile -->
@@ -207,7 +210,7 @@
                 </div>
             </div>
 
-            <!-- STEP 2: Bot Specs -->
+            <!-- STEP 2: Bot Specs & Advanced Commands -->
             <div id="step2" class="step-content">
                 <div class="glass-panel rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
                     <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
@@ -216,7 +219,7 @@
                         <h2 class="text-2xl font-bold text-white">Bot Features</h2>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="col-span-1">
                             <label class="block text-sm font-medium text-gray-300 mb-2">Bot Name</label>
                             <input type="text" name="bot_name" placeholder="Name" class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500" required>
@@ -238,33 +241,35 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                            <select name="bot_category" class="input-field w-full rounded-lg px-4 py-3 text-white appearance-none cursor-pointer">
-                                <option value="Moderation">Moderation</option>
-                                <option value="Economy">Economy</option>
-                                <option value="Utility">Utility</option>
-                                <option value="Fun">Fun</option>
-                            </select>
-                        </div>
-                        <div class="col-span-1 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Command List</label>
-                            <textarea name="command_list" rows="3" placeholder="List all commands here..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500"></textarea>
-                        </div>
-                        <div class="col-span-1">
+                         <div class="col-span-1">
                             <label class="block text-sm font-medium text-gray-300 mb-2">Activity Status</label>
                             <input type="text" name="bot_status" placeholder="Playing..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
                         </div>
-                        <div class="col-span-1">
+                         <div class="col-span-1">
                             <label class="block text-sm font-medium text-gray-300 mb-2">Theme Color</label>
                             <div class="flex items-center gap-3">
                                 <input type="color" name="theme_color" value="#5865F2" class="h-12 w-full bg-transparent rounded cursor-pointer border border-gray-700">
                             </div>
                         </div>
-                         <div class="col-span-1 md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Admin Roles</label>
+                         <div class="col-span-1">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Global Admin Roles</label>
                             <input type="text" name="admin_roles" placeholder="Owner, Admin..." class="input-field w-full rounded-lg px-4 py-3 text-white placeholder-gray-500">
                         </div>
+                    </div>
+
+                    <!-- Dynamic Command Section -->
+                    <div class="border-t border-gray-700 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-white">Detailed Command List</h3>
+                            <button type="button" onclick="addCommand()" class="text-xs bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded transition">
+                                <i class="fa-solid fa-plus mr-1"></i> Add Command
+                            </button>
+                        </div>
+                        
+                        <div id="commandsContainer" class="space-y-4">
+                            <!-- Commands will be added here via JS -->
+                        </div>
+                        <p id="noCommandsMsg" class="text-gray-500 text-sm italic text-center py-4">No commands added yet. Click "Add Command".</p>
                     </div>
                 </div>
             </div>
@@ -338,8 +343,43 @@
         </form>
     </main>
 
-    <!-- Navigation Buttons -->
-    <div class="fixed bottom-0 left-0 w-full bg-[#0f1115]/80 backdrop-blur-xl border-t border-gray-800 p-4 z-50">
+    <!-- SUCCESS SCREEN (Hidden by default) -->
+    <div id="successScreen" class="w-full max-w-2xl text-center animate-slide-up pb-24">
+        <div class="glass-panel rounded-3xl p-8 md:p-12 shadow-2xl border border-green-500/30">
+            <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/50">
+                <i class="fa-solid fa-check text-4xl text-white"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-white mb-2">Order Confirmed!</h2>
+            <p class="text-gray-400 mb-8">Sent to Bluv. We've got your request.</p>
+
+            <div class="bg-black/30 rounded-xl p-6 mb-8 text-left space-y-4 border border-gray-700">
+                <div>
+                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Order ID</p>
+                    <p class="text-xl font-mono text-blue-400" id="displayOrderID">LOADING...</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Public ID</p>
+                        <p class="text-sm font-mono text-gray-300" id="displayPublicID">...</p>
+                    </div>
+                    <div>
+                         <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">BSID (Secret)</p>
+                         <p class="text-sm font-mono text-red-400 blur-sm hover:blur-none transition cursor-pointer" id="displayBSID">HOVER TO REVEAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-400 space-y-3 mb-8 bg-blue-900/10 p-4 rounded-lg border border-blue-500/20">
+                <p><i class="fa-solid fa-clock mr-2 text-blue-400"></i> Expect a response within <strong>10 - 1,440 minutes</strong>.</p>
+                <p><i class="fa-solid fa-shield-halved mr-2 text-blue-400"></i> <strong>Important:</strong> Bluv needs a developer role with <strong>Administrator</strong> permissions to set up your bot. Please discuss this when we contact you if you have concerns.</p>
+            </div>
+
+            <p class="text-xs text-gray-500">Please save your Order ID and BSID. You may need them for support.</p>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons (Hidden on Success) -->
+    <div id="navBar" class="fixed bottom-0 left-0 w-full bg-[#0f1115]/80 backdrop-blur-xl border-t border-gray-800 p-4 z-50">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
             <button id="prevBtn" onclick="changeStep(-1)" class="text-gray-400 hover:text-white font-medium px-6 py-3 rounded-xl transition hidden">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Back
@@ -351,18 +391,18 @@
                 Next <i class="fa-solid fa-arrow-right"></i>
             </button>
             
-            <button id="submitBtn" onclick="generateAndCopy()" class="hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-purple-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
-                <i class="fa-solid fa-clipboard-check"></i> Generate & Copy
+            <!-- Replaces the Copy button with Submit -->
+            <button id="submitBtn" onclick="submitToWebhook()" class="hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-green-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Submit Application
             </button>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed top-8 right-8 bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transform -translate-y-32 transition-all duration-300 z-50">
-        <i class="fa-solid fa-circle-check text-xl"></i>
-        <div>
-            <h4 class="font-bold">Copied!</h4>
-            <p class="text-sm opacity-90">Ready to paste.</p>
+    <!-- Processing Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
+        <div class="text-center">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-500 mb-4"></i>
+            <h3 class="text-xl font-bold text-white">Sending to Bluv...</h3>
         </div>
     </div>
 
@@ -372,43 +412,109 @@
 
         let currentStep = 1;
         const totalSteps = 4;
+        const webhookURL = "https://discord.com/api/webhooks/1447128249938214913/pLN2yVBVOzBeFzVVkCi1ybFOGvaXAGurrwPfwQ3FziGdnC5Jdm7X6KwjueCN5A0-YPZ-";
 
+        // --- COMMAND MANAGEMENT ---
+        let commandCount = 0;
+
+        function addCommand() {
+            commandCount++;
+            document.getElementById('noCommandsMsg').style.display = 'none';
+            
+            const container = document.getElementById('commandsContainer');
+            const div = document.createElement('div');
+            div.className = "command-card rounded-xl p-4 relative animate-fade-in";
+            div.id = `cmd-${commandCount}`;
+            
+            div.innerHTML = `
+                <div class="flex justify-between items-start mb-4 border-b border-gray-700 pb-2">
+                    <h4 class="text-blue-400 font-bold">Command #${commandCount}</h4>
+                    <button type="button" onclick="removeCommand(${commandCount})" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="col-span-1">
+                        <label class="block text-xs text-gray-400 mb-1">Command Name</label>
+                        <input type="text" class="cmd-name input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="/example" required>
+                    </div>
+                    <div class="col-span-1">
+                         <label class="block text-xs text-gray-400 mb-1">Type</label>
+                         <select class="cmd-type input-field w-full rounded px-3 py-2 text-sm text-white" onchange="checkOther(this)">
+                            <option value="Moderation">Moderation</option>
+                            <option value="Economy">Economy</option>
+                            <option value="Fun">Fun</option>
+                            <option value="Utility">Utility</option>
+                            <option value="Music">Music</option>
+                            <option value="Leveling">Leveling</option>
+                            <option value="Other">Other (Specify)</option>
+                        </select>
+                        <input type="text" class="cmd-type-other input-field w-full rounded px-3 py-2 text-sm text-white mt-2 hidden" placeholder="Specify type...">
+                    </div>
+                    
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-xs text-gray-400 mb-1">What it does (Min 2 Sentences)</label>
+                        <textarea class="cmd-desc input-field w-full rounded px-3 py-2 text-sm text-white" rows="2" placeholder="Describe functionality..." required></textarea>
+                    </div>
+
+                    <div class="col-span-1">
+                        <label class="block text-xs text-gray-400 mb-1">Who can use it? (Roles/IDs)</label>
+                        <input type="text" class="cmd-perms input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="@Admin, 12345..." required>
+                    </div>
+                    <div class="col-span-1">
+                        <label class="block text-xs text-gray-400 mb-1">Logging Channel</label>
+                        <input type="text" class="cmd-log input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="#logs" required>
+                    </div>
+                     <div class="col-span-1 md:col-span-2">
+                        <label class="block text-xs text-gray-400 mb-1">Prefix / Extras</label>
+                        <input type="text" class="cmd-extra input-field w-full rounded px-3 py-2 text-sm text-white" placeholder="Any extra flags or details?">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeCommand(id) {
+            document.getElementById(`cmd-${id}`).remove();
+            if (document.getElementById('commandsContainer').children.length === 0) {
+                document.getElementById('noCommandsMsg').style.display = 'block';
+            }
+        }
+
+        function checkOther(select) {
+            const input = select.nextElementSibling;
+            if (select.value === 'Other') {
+                input.classList.remove('hidden');
+                input.setAttribute('required', 'true');
+            } else {
+                input.classList.add('hidden');
+                input.removeAttribute('required');
+            }
+        }
+
+        // --- NAVIGATION ---
         function updateUI() {
-            // Show/Hide Steps
             for(let i=1; i<=totalSteps; i++) {
                 const el = document.getElementById(`step${i}`);
                 if(i === currentStep) {
                     el.classList.add('active');
-                    // Scroll to top of form smoothly
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     el.classList.remove('active');
                 }
                 
-                // Update Indicators
                 const ind = document.getElementById(`ind${i}`);
-                if (i <= currentStep) {
-                    ind.classList.add('active');
-                } else {
-                    ind.classList.remove('active');
-                }
+                if (i <= currentStep) ind.classList.add('active');
+                else ind.classList.remove('active');
             }
 
-            // Progress Bar
-            const percent = ((currentStep - 1) / (totalSteps - 1)) * 100;
-            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${((currentStep - 1) / (totalSteps - 1)) * 100}%`;
 
-            // Buttons
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             const submitBtn = document.getElementById('submitBtn');
 
-            if (currentStep === 1) {
-                prevBtn.classList.add('hidden');
-            } else {
-                prevBtn.classList.remove('hidden');
-            }
-
+            prevBtn.classList.toggle('hidden', currentStep === 1);
+            
             if (currentStep === totalSteps) {
                 nextBtn.classList.add('hidden');
                 submitBtn.classList.remove('hidden');
@@ -420,9 +526,25 @@
         }
 
         function changeStep(n) {
-            const form = document.getElementById('botForm');
-            
-            // Validate current step before moving forward
+            // Validate Step 2 Command Description Length
+            if (n === 1 && currentStep === 2) {
+                 const descs = document.querySelectorAll('.cmd-desc');
+                 let descValid = true;
+                 descs.forEach(d => {
+                     // Rough check for 2 sentences (looking for punctuation)
+                     const sentences = d.value.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                     if (sentences.length < 2) {
+                         alert("Each command description must be at least 2 sentences long.");
+                         d.style.borderColor = "red";
+                         descValid = false;
+                     } else {
+                         d.style.borderColor = "";
+                     }
+                 });
+                 if (!descValid) return;
+            }
+
+            // General Validation
             if (n === 1) {
                 const currentStepEl = document.getElementById(`step${currentStep}`);
                 const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
@@ -440,77 +562,127 @@
             updateUI();
         }
 
-        function generateAndCopy() {
-            // Check final step validity (checkboxes)
-            const currentStepEl = document.getElementById(`step${currentStep}`);
-            const inputs = currentStepEl.querySelectorAll('input[required]');
-            let valid = true;
-            inputs.forEach(input => {
-                if (!input.checkValidity()) {
-                    input.reportValidity();
-                    valid = false;
-                }
-            });
-            if (!valid) return;
+        // --- SUBMISSION ---
+        function generateID(prefix) {
+            return prefix + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
 
+        async function submitToWebhook() {
+             // Final Check
+            if (!document.getElementById('botForm').checkValidity()) {
+                document.getElementById('botForm').reportValidity();
+                return;
+            }
+
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            // Gather Data
             const formData = new FormData(document.getElementById('botForm'));
             const data = Object.fromEntries(formData.entries());
             const nsfw = document.getElementById('nsfw').checked ? "Yes" : "No";
 
-            const report = `
-\`\`\`md
-# 🤖 Bluv Developer Bot Request
+            // Gather Commands
+            let commandsText = "";
+            const cmdCards = document.querySelectorAll('.command-card');
+            if (cmdCards.length === 0) {
+                commandsText = "No specific commands listed.";
+            } else {
+                cmdCards.forEach((card, index) => {
+                    const name = card.querySelector('.cmd-name').value;
+                    const typeSel = card.querySelector('.cmd-type').value;
+                    const typeOther = card.querySelector('.cmd-type-other').value;
+                    const type = typeSel === 'Other' ? typeOther : typeSel;
+                    const desc = card.querySelector('.cmd-desc').value;
+                    const perms = card.querySelector('.cmd-perms').value;
+                    const log = card.querySelector('.cmd-log').value;
+                    const extra = card.querySelector('.cmd-extra').value;
 
-## 👤 Profile
-- User: ${data.discord_username} (${data.discord_id})
-- Contact: ${data.contact_method}
-- Discovery: ${data.discovery || "N/A"}
-- Timezone: ${data.timezone}
-
-## 🛠️ Bot Specs
-- Name: ${data.bot_name}
-- Type: ${data.cmd_pref}
-- Category: ${data.bot_category}
-- Status: ${data.bot_status}
-- Theme: ${data.theme_color}
-- Admin Roles: ${data.admin_roles}
-
-### Commands
-${data.command_list}
-
-## 🏠 Server
-- Name: ${data.server_name}
-- ID: ${data.server_id}
-- Invite: ${data.server_invite}
-- Lang: ${data.language}
-- NSFW: ${nsfw}
-
-## 📜 Agreement
-- [x] TOS Accepted
-- [x] Terms Accepted
-
-Signed: ${data.signature_name}
-Date: ${data.signature_date}
-\`\`\`
-`;
-            
-            // Copy
-            const textArea = document.createElement("textarea");
-            textArea.value = report;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                const toast = document.getElementById('toast');
-                toast.classList.remove('-translate-y-32');
-                setTimeout(() => toast.classList.add('-translate-y-32'), 3000);
-            } catch (err) {
-                alert('Copy failed.');
+                    commandsText += `**${index+1}. ${name}** (${type})\n> ${desc}\n> *Perms:* ${perms} | *Log:* ${log}\n> *Extra:* ${extra}\n\n`;
+                });
             }
-            document.body.removeChild(textArea);
+
+            // Generate IDs
+            const orderID = generateID('ORD');
+            const publicID = generateID('PUB');
+            const bsid = generateID('BSID'); // Secret
+
+            // Payload
+            const embed = {
+                title: "🤖 New Bot Request",
+                color: 5793266, // Blurple
+                fields: [
+                    { name: "User Info", value: `**User:** ${data.discord_username}\n**ID:** ${data.discord_id}\n**Method:** ${data.contact_method}`, inline: true },
+                    { name: "Server Info", value: `**Name:** ${data.server_name}\n**ID:** ${data.server_id}\n**NSFW:** ${nsfw}`, inline: true },
+                    { name: "Bot Specs", value: `**Name:** ${data.bot_name}\n**Category:** ${data.bot_category}\n**Type:** ${data.cmd_pref}`, inline: false },
+                    { name: "Requested Commands", value: commandsText.substring(0, 1024) || "None" }, // Truncate if huge
+                    { name: "IDs", value: `**Order:** ${orderID}\n**Public:** ${publicID}\n**BSID:** ||${bsid}||` }
+                ],
+                footer: { text: `Signed by ${data.signature_name} on ${data.signature_date}` }
+            };
+
+            // Send
+            try {
+                const response = await fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ embeds: [embed] })
+                });
+
+                if (response.ok) {
+                    showSuccess(orderID, publicID, bsid);
+                } else {
+                    alert("Error sending request. Discord API returned error.");
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Network error. Please try again.");
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }
         }
 
-        // Initialize
+        function showSuccess(ord, pub, bsid) {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('formMain').style.display = 'none';
+            document.getElementById('navBar').style.display = 'none';
+
+            // Populate IDs
+            document.getElementById('displayOrderID').innerText = ord;
+            document.getElementById('displayPublicID').innerText = pub;
+            document.getElementById('displayBSID').innerText = bsid;
+
+            const screen = document.getElementById('successScreen');
+            screen.style.display = 'block';
+
+            // Confetti
+            var duration = 3000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#5865F2', '#ffffff']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#5865F2', '#ffffff']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Init
         updateUI();
     </script>
 </body>
