@@ -147,6 +147,12 @@
             margin-top: 4px;
             font-weight: bold;
         }
+        
+        /* Break long IDs */
+        .break-ids {
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans" oncontextmenu="return false;">
@@ -459,7 +465,7 @@
         <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-earth-500">
              <div class="flex gap-6">
                  <a href="https://bluv-developer.github.io/Bots/Form" class="hover:text-tan-accent transition-colors">Current Form</a>
-                 <a href="https://bluv-developer.github.io/Bots/" class="hover:text-tan-accent transition-colors">All Bots</a>
+                 <a href="https://bluv-developer.github.io/Bots/" class="hover:text-tan-accent transition-colors">General Info</a>
                  <a href="https://bluv-developer.github.io/Bluv" class="hover:text-tan-accent transition-colors">Main Site</a>
              </div>
              <div>
@@ -506,7 +512,7 @@
 
             <div class="bg-black/30 p-6 rounded-xl border border-earth-700 font-mono text-xs text-earth-400 mb-8">
                 <p class="mb-4 text-tan-accent uppercase tracking-widest font-bold">Reference IDs (Save These)</p>
-                <div class="grid grid-cols-1 gap-y-2" id="generatedIds" style="word-break: break-all;">
+                <div class="grid grid-cols-1 gap-y-3 break-ids" id="generatedIds">
                     <!-- IDs injected here -->
                 </div>
             </div>
@@ -529,14 +535,38 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- Color Picker Logic ---
-        const customInput = document.getElementById('customColorInput');
-        const container = document.getElementById('customColorContainer');
-        const preview = document.getElementById('colorPreview');
-        const validationMsg = document.getElementById('colorValidationMsg');
+        document.addEventListener('DOMContentLoaded', () => {
+            // Context Menu Logic
+            const contextMenu = document.getElementById('custom-context-menu');
+            document.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+                const { clientX: mouseX, clientY: mouseY } = event;
+                contextMenu.style.top = `${mouseY}px`;
+                contextMenu.style.left = `${mouseX}px`;
+                contextMenu.style.display = 'block';
+            });
+            document.addEventListener('click', (e) => {
+                if (e.target.offsetParent != contextMenu) {
+                    contextMenu.style.display = 'none';
+                }
+            });
 
+            // Prevent shortcuts/copy
+            document.addEventListener('copy', (e) => { e.preventDefault(); return false; });
+            document.addEventListener('cut', (e) => { e.preventDefault(); return false; });
+            document.addEventListener('paste', (e) => { e.preventDefault(); return false; });
+            document.addEventListener('dragstart', (e) => { e.preventDefault(); return false; });
+        });
+
+        // Global functions for onclick handlers
+        
+        // --- Color Picker Logic ---
         function handleColorChange() {
             const select = document.getElementById('colorSelect');
+            const customInput = document.getElementById('customColorInput');
+            const container = document.getElementById('customColorContainer');
+            const preview = document.getElementById('colorPreview');
+            const validationMsg = document.getElementById('colorValidationMsg');
             const selectedValue = select.value;
 
             if (selectedValue === 'custom') {
@@ -553,9 +583,11 @@
             }
         }
 
-        customInput.addEventListener('input', validateCustomColor);
-
         function validateCustomColor() {
+            const customInput = document.getElementById('customColorInput');
+            const preview = document.getElementById('colorPreview');
+            const validationMsg = document.getElementById('colorValidationMsg');
+            
             const val = customInput.value.trim();
             const s = new Option().style;
             s.color = val;
@@ -571,6 +603,10 @@
                 validationMsg.style.color = "#ef4444"; 
             }
         }
+        
+        // Attach input listener if element exists
+        const customColorInput = document.getElementById('customColorInput');
+        if(customColorInput) customColorInput.addEventListener('input', validateCustomColor);
         
         // --- Custom Category Logic ---
         function handleCategoryChange(selectElement) {
@@ -614,12 +650,18 @@
             let valid = true;
 
             inputs.forEach(input => {
-                if (input.offsetParent !== null && !input.checkValidity()) { 
+                // Check if element is visible
+                const isHidden = input.offsetParent === null;
+                
+                // Only validate visible fields
+                if (!isHidden && !input.checkValidity()) {
                     input.classList.add('input-error');
                     valid = false;
                     input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
                 }
-                if (input.id === 'customColorInput' && !input.classList.contains('hidden')) {
+                
+                // Special check for custom color input if visible
+                if (input.id === 'customColorInput' && !isHidden) {
                     const s = new Option().style;
                     s.color = input.value;
                     if(s.color === '') {
@@ -855,11 +897,11 @@
                 // Populate Success Screen with IDs
                 const idContainer = document.getElementById('generatedIds');
                 idContainer.innerHTML = `
-                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Order ID:</span> <span class="text-white font-bold">${orderId}</span></div>
-                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Bluv ID:</span> <span class="text-white font-bold">${bluvId}</span></div>
-                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Unit ID:</span> <span class="text-white font-bold">${unitId}</span></div>
-                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Auth ID:</span> <span class="text-white font-bold">${authId}</span></div>
-                    <div class="flex flex-col md:flex-row md:justify-between pb-2"><span class="text-earth-400">Trace ID:</span> <span class="text-white font-bold">${traceId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Order ID:</span> <span class="text-white font-bold select-all">${orderId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Bluv ID:</span> <span class="text-white font-bold select-all">${bluvId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Unit ID:</span> <span class="text-white font-bold select-all">${unitId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Auth ID:</span> <span class="text-white font-bold select-all">${authId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between pb-2"><span class="text-earth-400">Trace ID:</span> <span class="text-white font-bold select-all">${traceId}</span></div>
                 `;
 
                 // Show Success Page
