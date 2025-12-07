@@ -18,20 +18,19 @@
                         mono: ['Space Mono', 'monospace'],
                     },
                     colors: {
-                        // Casual Earth Theme
                         earth: {
-                            900: '#1c1917', // Warm Black
-                            800: '#292524', // Dark Espresso
-                            700: '#44403c', // Stone
+                            900: '#1c1917',
+                            800: '#292524',
+                            700: '#44403c',
                             600: '#57534e',
                             500: '#78716c',
                             400: '#a8a29e',
-                            300: '#d6d3d1', // Tan
+                            300: '#d6d3d1',
                             200: '#e7e5e4',
-                            100: '#f5f5f4', // Off White
+                            100: '#f5f5f4',
                         },
                         tan: {
-                            accent: '#d4b483', // Gold/Tan Accent
+                            accent: '#d4b483',
                             glow: 'rgba(212, 180, 131, 0.3)'
                         }
                     },
@@ -71,7 +70,6 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        /* Custom Inputs */
         .input-casual {
             background-color: rgba(28, 25, 23, 0.5);
             border: 1px solid #44403c;
@@ -89,8 +87,17 @@
             border-color: #ef4444 !important;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
         }
+        
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .input-error + .error-msg {
+            display: block;
+        }
 
-        /* Context Menu */
         #custom-context-menu {
             position: absolute;
             z-index: 1000;
@@ -103,7 +110,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
         }
-
         .ctx-item {
             padding: 8px 16px;
             font-size: 14px;
@@ -123,15 +129,12 @@
         .step-panel.active { display: block; }
         img { pointer-events: none; }
         
-        /* Color Preview Circle */
-        .color-preview {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid #44403c;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
+        .color-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -147,12 +150,24 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-panel border-b-0 mb-8">
-        <div class="max-w-6xl mx-auto px-8 h-24 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Bots" class="h-16 w-auto object-contain">
+        <div class="max-w-6xl mx-auto px-6 h-24 flex flex-col md:flex-row items-center justify-between">
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2 text-xs font-mono text-earth-400 mb-1">
+                    <a href="https://bluv-developer.github.io/Bluv" target="_blank" class="hover:text-tan-accent transition-colors">Bluv Development</a>
+                    <i class="fas fa-chevron-right text-[10px]"></i>
+                    <a href="https://bluv-developer.github.io/Bots/" target="_blank" class="hover:text-tan-accent transition-colors">Discord Bots</a>
+                    <i class="fas fa-chevron-right text-[10px]"></i>
+                    <span class="text-white">Form</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Bots" class="h-10 w-auto object-contain">
+                </div>
             </div>
             
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 mt-2 md:mt-0">
+                <a href="https://discord.gg/KmHfjDm2WA" target="_blank" class="text-xs bg-earth-800 hover:bg-[#5865F2] hover:text-white px-3 py-1.5 rounded-lg border border-earth-700 transition-all">
+                    <i class="fab fa-discord mr-1"></i> Join Discord
+                </a>
                 <div class="text-sm font-mono text-earth-400 bg-earth-800/50 px-4 py-2 rounded-lg border border-earth-700">
                     Step <span id="step-indicator" class="text-white font-bold text-lg">1</span> of 4
                 </div>
@@ -173,39 +188,41 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Client Info -->
                         <div class="space-y-6">
                             <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Your Info</h3>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Discord Username <span class="text-red-500">*</span></label>
                                 <input type="text" name="client_discord" required class="input-casual w-full p-4 rounded-xl" placeholder="Username#0000">
+                                <p class="error-msg">This field is required.</p>
                             </div>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Discord ID <span class="text-red-500">*</span></label>
                                 <input type="text" name="client_id" required class="input-casual w-full p-4 rounded-xl" placeholder="123456789...">
+                                <p class="error-msg">This field is required.</p>
                             </div>
                         </div>
 
-                        <!-- Server Info -->
                         <div class="space-y-6">
                             <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Server Info</h3>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Server Name <span class="text-red-500">*</span></label>
                                 <input type="text" name="server_name" required class="input-casual w-full p-4 rounded-xl" placeholder="My Awesome Server">
+                                <p class="error-msg">This field is required.</p>
                             </div>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Server Invite Link <span class="text-red-500">*</span></label>
                                 <input type="text" name="server_invite" required class="input-casual w-full p-4 rounded-xl" placeholder="discord.gg/...">
+                                <p class="error-msg">This field is required.</p>
                             </div>
                         </div>
 
-                        <!-- Bot Persona -->
                         <div class="md:col-span-2 mt-4 pt-6 border-t border-earth-700/50">
                             <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest mb-6">Bot Identity</h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label class="block text-xs text-earth-400 mb-2">Bot Name <span class="text-red-500">*</span></label>
                                     <input type="text" name="bot_name" required class="input-casual w-full p-4 rounded-xl" placeholder="Helper Bot">
+                                    <p class="error-msg">This field is required.</p>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-earth-400 mb-2">Prefix <span class="text-red-500">*</span></label>
@@ -231,8 +248,8 @@
                             <!-- Enhanced Color Picker -->
                             <div class="mt-6 p-6 bg-earth-800/30 rounded-xl border border-earth-700">
                                 <label class="block text-xs text-earth-400 mb-2">Bot Color Theme <span class="text-red-500">*</span></label>
-                                <div class="flex flex-col md:flex-row gap-4 items-center">
-                                    <div class="relative w-full">
+                                <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                                    <div class="relative w-full md:w-1/2">
                                         <select id="colorSelect" name="theme_color_select" onchange="handleColorChange()" class="input-casual w-full p-4 pl-12 rounded-xl cursor-pointer appearance-none">
                                             <option value="#3b82f6" data-color="#3b82f6">Bluv Blue</option>
                                             <option value="#d4b483" data-color="#d4b483">Casual Tan</option>
@@ -240,11 +257,14 @@
                                             <option value="#ffffff" data-color="#ffffff">Classic White</option>
                                             <option value="#ef4444" data-color="#ef4444">Alert Red</option>
                                             <option value="#22c55e" data-color="#22c55e">Success Green</option>
-                                            <option value="custom" data-color="transparent">Custom Hex Code...</option>
+                                            <option value="custom" data-color="transparent">Custom Color...</option>
                                         </select>
                                         <div id="colorPreview" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full border border-earth-500 bg-blue-500 shadow-lg"></div>
                                     </div>
-                                    <input type="text" id="customColorInput" name="custom_theme_color" class="input-casual w-full md:w-1/3 p-4 rounded-xl hidden" placeholder="#XXXXXX">
+                                    <div class="w-full md:w-1/2 hidden" id="customColorContainer">
+                                        <input type="text" id="customColorInput" name="custom_theme_color" class="input-casual w-full p-4 rounded-xl" placeholder="e.g. #FF0000 or Red">
+                                        <div id="colorValidationMsg" class="color-status"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -252,9 +272,9 @@
                 </div>
 
                 <div class="mt-8 flex justify-between items-center">
-                    <div class="flex items-center gap-2 opacity-50">
-                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
-                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    <div class="flex items-center gap-2 opacity-70">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5">
+                        <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
                     </div>
                     <button type="button" onclick="validateAndNext(1)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50 transform hover:-translate-y-1">
                         Next Step <i class="fas fa-arrow-right ml-2"></i>
@@ -268,11 +288,17 @@
                     <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
                         <div>
                             <h1 class="text-4xl font-light text-white mb-2">Commands</h1>
-                            <p class="text-earth-400">Add commands. Be specific!</p>
+                            <p class="text-earth-400">Add at least 1 command. Be specific!</p>
                         </div>
                         <button type="button" onclick="addCommandRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
                             <i class="fas fa-plus mr-1"></i> Add Command
                         </button>
+                    </div>
+
+                    <!-- In-page Error Container -->
+                    <div id="cmd-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3">
+                        <i class="fas fa-exclamation-circle text-lg"></i>
+                        <span>Please add at least 1 command before proceeding.</span>
                     </div>
 
                     <div id="commands-container" class="space-y-6">
@@ -284,9 +310,9 @@
                 </div>
 
                 <div class="mt-8 flex justify-between items-center">
-                    <div class="flex items-center gap-2 opacity-50">
-                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
-                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    <div class="flex items-center gap-2 opacity-70">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5">
+                        <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
                     </div>
                     <div class="flex gap-4">
                         <button type="button" onclick="changeStep(1)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
@@ -303,11 +329,17 @@
                     <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
                         <div>
                             <h1 class="text-4xl font-light text-white mb-2">Features</h1>
-                            <p class="text-earth-400">Passive systems like Welcomers, Logging, etc.</p>
+                            <p class="text-earth-400">Add at least 3 passive systems (Welcomer, Logs, etc.)</p>
                         </div>
                         <button type="button" onclick="addFeatureRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
                             <i class="fas fa-plus mr-1"></i> Add Feature
                         </button>
+                    </div>
+
+                    <!-- In-page Error Container -->
+                    <div id="feat-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3">
+                        <i class="fas fa-exclamation-circle text-lg"></i>
+                        <span>Please add at least 3 features before proceeding.</span>
                     </div>
 
                     <div id="features-container" class="space-y-6">
@@ -319,9 +351,9 @@
                 </div>
 
                 <div class="mt-8 flex justify-between items-center">
-                    <div class="flex items-center gap-2 opacity-50">
-                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
-                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    <div class="flex items-center gap-2 opacity-70">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5">
+                        <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
                     </div>
                     <div class="flex gap-4">
                         <button type="button" onclick="changeStep(2)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
@@ -360,7 +392,6 @@
                         </div>
                     </div>
 
-                    <!-- Privacy Notice -->
                     <div class="p-6 bg-earth-900/50 rounded-xl border border-earth-700 mb-8">
                         <div class="flex items-start gap-4">
                             <i class="fas fa-shield-alt text-2xl text-tan-accent mt-1"></i>
@@ -376,13 +407,14 @@
                     <div class="space-y-4">
                         <label class="block text-xs font-bold text-tan-accent uppercase tracking-widest">Any other notes? <span class="text-red-500">*</span></label>
                         <textarea name="notes" required class="input-casual w-full p-4 rounded-xl h-32 resize-none" placeholder="Do you need any specific APIs? Or have a deadline? Type 'None' if nothing."></textarea>
+                        <p class="error-msg">This field is required.</p>
                     </div>
                 </div>
 
                 <div class="mt-8 flex justify-between items-center">
-                    <div class="flex items-center gap-2 opacity-50">
-                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
-                        <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+                    <div class="flex items-center gap-2 opacity-70">
+                        <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5">
+                        <span class="text-xs font-mono text-earth-400">Powered by Bluv</span>
                     </div>
                     <div class="flex gap-4 items-center">
                         <button type="button" onclick="changeStep(3)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
@@ -395,38 +427,119 @@
 
         </form>
     </main>
+    
+    <!-- Footer Links -->
+    <footer class="fixed bottom-0 w-full bg-earth-900/90 backdrop-blur border-t border-earth-700 z-40 py-2">
+        <div class="max-w-6xl mx-auto px-6 flex justify-center md:justify-end gap-6 text-xs font-mono text-earth-500">
+             <a href="https://bluv-developer.github.io/Bots/Form" class="hover:text-tan-accent">Current Form</a>
+             <a href="https://bluv-developer.github.io/Bots/" class="hover:text-tan-accent">All Bots</a>
+             <a href="https://bluv-developer.github.io/Bluv" class="hover:text-tan-accent">Main Site</a>
+        </div>
+    </footer>
 
-    <!-- Success Modal -->
-    <div id="successModal" class="fixed inset-0 z-[100] hidden bg-black/90 backdrop-blur-md items-center justify-center p-4">
-        <div class="bg-earth-800 border border-tan-accent/30 p-10 rounded-2xl text-center max-w-md shadow-2xl">
-            <div class="w-16 h-16 bg-tan-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-check text-2xl text-tan-accent"></i>
+    <!-- Full Page Success Screen -->
+    <div id="successScreen" class="fixed inset-0 z-[200] hidden bg-earth-900 flex-col items-center justify-center p-6 overflow-y-auto">
+        <div class="max-w-3xl w-full bg-earth-800/50 border border-tan-accent/20 p-8 md:p-12 rounded-3xl shadow-2xl relative">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-tan-accent via-earth-500 to-tan-accent opacity-50 rounded-t-3xl"></div>
+            
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-tan-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-tan-accent/30">
+                    <i class="fas fa-check text-4xl text-tan-accent"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-white mb-4">Submission Successful!</h1>
+                <p class="text-earth-300 text-lg">Your bot specification has been securely transmitted.</p>
             </div>
-            <h2 class="text-2xl font-bold text-white mb-2">Request Sent!</h2>
-            <p class="text-earth-300 text-sm mb-6">Your bot specification has been securely transmitted. We will review it shortly.</p>
-            <button onclick="location.reload()" class="bg-tan-accent text-earth-900 px-6 py-3 rounded-lg font-bold text-sm hover:bg-white transition-colors">
-                Start New Form
-            </button>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-earth-900/50 p-6 rounded-xl border border-earth-700">
+                    <h3 class="text-tan-accent font-bold mb-3 uppercase tracking-widest text-xs">Why this helps</h3>
+                    <p class="text-sm text-earth-400 leading-relaxed">
+                        Providing detailed specifications helps us build your bot faster and more accurately without constant back-and-forth questions. We now have a blueprint to start coding immediately.
+                    </p>
+                </div>
+                <div class="bg-earth-900/50 p-6 rounded-xl border border-earth-700">
+                    <h3 class="text-tan-accent font-bold mb-3 uppercase tracking-widest text-xs">What happens next</h3>
+                    <p class="text-sm text-earth-400 leading-relaxed">
+                        Bluv or one of his official bots will contact you soon via Discord.
+                    </p>
+                    <div class="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                        <p class="text-xs text-red-300 font-bold">
+                            <i class="fas fa-shield-alt mr-1"></i> SECURITY NOTE:
+                        </p>
+                        <p class="text-[10px] text-red-200 mt-1">
+                            Only official bots from <a href="https://discord.gg/KmHfjDm2WA" class="underline hover:text-white">The Official Discord Community</a> will contact you. Verify IDs before trusting DM's.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-black/30 p-6 rounded-xl border border-earth-700 font-mono text-xs text-earth-400 mb-8">
+                <p class="mb-4 text-tan-accent uppercase tracking-widest font-bold">Reference IDs (Save These)</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2" id="generatedIds">
+                    <!-- IDs injected here -->
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="https://discord.gg/KmHfjDm2WA" class="bg-[#5865F2] hover:bg-[#4752c4] text-white px-8 py-4 rounded-xl font-bold transition-all text-center">
+                    <i class="fab fa-discord mr-2"></i> Join Community
+                </a>
+                <button onclick="location.reload()" class="bg-earth-700 hover:bg-earth-600 text-white px-8 py-4 rounded-xl font-bold transition-all">
+                    Submit Another
+                </button>
+            </div>
+            
+            <div class="mt-8 text-center opacity-50 flex justify-center items-center gap-2">
+                 <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20%20(1).png" class="w-5 h-5 grayscale">
+                 <span class="text-xs font-mono text-earth-500">Powered by Bluv</span>
+            </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // --- Color Picker Logic ---
+        const customInput = document.getElementById('customColorInput');
+        const container = document.getElementById('customColorContainer');
+        const preview = document.getElementById('colorPreview');
+        const validationMsg = document.getElementById('colorValidationMsg');
+
         function handleColorChange() {
             const select = document.getElementById('colorSelect');
-            const preview = document.getElementById('colorPreview');
-            const customInput = document.getElementById('customColorInput');
             const selectedValue = select.value;
 
             if (selectedValue === 'custom') {
-                customInput.classList.remove('hidden');
+                container.classList.remove('hidden');
                 preview.style.backgroundColor = 'transparent';
                 customInput.required = true;
+                customInput.focus();
+                validateCustomColor(); // Run check immediately
             } else {
-                customInput.classList.add('hidden');
+                container.classList.add('hidden');
                 preview.style.backgroundColor = selectedValue;
                 customInput.required = false;
+                validationMsg.textContent = "";
+            }
+        }
+
+        // Live Custom Color Validation
+        customInput.addEventListener('input', validateCustomColor);
+
+        function validateCustomColor() {
+            const val = customInput.value.trim();
+            // Check if valid using Option styling trick
+            const s = new Option().style;
+            s.color = val;
+            
+            if (s.color !== '') {
+                preview.style.backgroundColor = val;
+                validationMsg.textContent = "VALID COLOR";
+                validationMsg.style.color = "#22c55e"; // Green
+                customInput.classList.remove('input-error');
+            } else {
+                preview.style.backgroundColor = 'transparent';
+                validationMsg.textContent = "INVALID COLOR";
+                validationMsg.style.color = "#ef4444"; // Red
             }
         }
         
@@ -471,32 +584,44 @@
             const inputs = currentPanel.querySelectorAll('input, select, textarea');
             let valid = true;
 
-            // Basic HTML5 Validity Check
             inputs.forEach(input => {
-                if (input.offsetParent !== null && !input.checkValidity()) { // Check only visible inputs
+                // Check visible required inputs
+                if (input.offsetParent !== null && !input.checkValidity()) { 
                     input.classList.add('input-error');
-                    input.reportValidity();
                     valid = false;
-                    // Remove error class on input
                     input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
+                }
+                // Custom color specific check
+                if (input.id === 'customColorInput' && !input.classList.contains('hidden')) {
+                    const s = new Option().style;
+                    s.color = input.value;
+                    if(s.color === '') {
+                        input.classList.add('input-error');
+                        valid = false;
+                    }
                 }
             });
 
-            if (!valid) return;
+            if (!valid) return; // Stop if basic fields invalid
 
-            // Specific Step Validation
+            // Logic Validation
             if (current === 2) {
                 if (document.querySelectorAll('.command-row').length < 1) {
-                    alert("Please add at least 1 command.");
+                    const banner = document.getElementById('cmd-error-banner');
+                    banner.classList.remove('hidden');
+                    setTimeout(() => banner.classList.add('hidden'), 5000);
                     return;
                 }
             }
             if (current === 3) {
                 if (document.querySelectorAll('.feature-row').length < 3) {
-                    alert("Please add at least 3 features.");
+                    const banner = document.getElementById('feat-error-banner');
+                    banner.classList.remove('hidden');
+                    setTimeout(() => banner.classList.add('hidden'), 5000);
                     return;
                 }
             }
+            
             changeStep(current + 1);
         }
 
@@ -506,7 +631,7 @@
             }
         }
 
-        // --- Dynamic Rows (Commands) ---
+        // --- Dynamic Rows ---
         function addCommandRow() {
             document.getElementById('empty-commands').style.display = 'none';
             const container = document.getElementById('commands-container');
@@ -553,7 +678,6 @@
                             <input type="number" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="0">
                         </div>
                     </div>
-                    <!-- Custom Fields Area -->
                     <div id="cmd-custom-${id}"></div>
                     <button type="button" onclick="addCustomField('cmd-custom-${id}')" class="text-xs text-tan-accent hover:text-white underline decoration-dashed underline-offset-4">
                         + Add Custom Detail/Question
@@ -563,7 +687,6 @@
             container.appendChild(row);
         }
 
-        // --- Dynamic Rows (Features) ---
         function addFeatureRow() {
             document.getElementById('empty-features').style.display = 'none';
             const container = document.getElementById('features-container');
@@ -592,7 +715,6 @@
                         <label class="block text-[10px] text-earth-400 mb-1">How does it work? <span class="text-red-500">*</span></label>
                         <textarea required class="input-casual w-full p-3 rounded-lg text-sm h-20 resize-none" placeholder="Explain the logic in detail."></textarea>
                     </div>
-                    <!-- Custom Fields Area -->
                     <div id="feat-custom-${id}"></div>
                     <button type="button" onclick="addCustomField('feat-custom-${id}')" class="text-xs text-tan-accent hover:text-white underline decoration-dashed underline-offset-4">
                         + Add Custom Detail/Question
@@ -602,7 +724,12 @@
             container.appendChild(row);
         }
 
-        // --- Webhook Submission (Chunked) ---
+        // --- ID Generator ---
+        function generateId(prefix) {
+            return prefix + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        // --- Webhook Submission ---
         async function submitToWebhook() {
             const btn = document.getElementById('submitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
@@ -613,10 +740,18 @@
             const form = document.getElementById('botForm');
             const fd = new FormData(form);
 
-            // 1. Send Identity & Basics
+            // Generate IDs
+            const orderId = generateId('ORD');
+            const bluvId = generateId('BLV');
+            const unitId = generateId('UNT');
+            const authId = generateId('AUTH');
+            const traceId = generateId('TRC');
+
+            // 1. Send Identity
             const colorSelection = document.getElementById('colorSelect').value === 'custom' ? document.getElementById('customColorInput').value : document.getElementById('colorSelect').value;
             
             let identityMsg = "**New Bot Request [1/3]: Identity** 🆔\n";
+            identityMsg += `**IDs:** Order: \`${orderId}\` | Bluv: \`${bluvId}\` | Unit: \`${unitId}\`\n`;
             identityMsg += `**Client:** ${fd.get('client_discord')} (${fd.get('client_id')})\n`;
             identityMsg += `**Server:** ${fd.get('server_name')} (<${fd.get('server_invite')}>)\n`;
             identityMsg += `**Bot:** ${fd.get('bot_name')} | Prefix: \`${fd.get('bot_prefix')}\` | Status: ${fd.get('bot_status')}\n`;
@@ -627,14 +762,12 @@
             try {
                 await sendWebhook(webhookURL, identityMsg);
 
-                // 2. Process Commands
+                // 2. Commands
                 const cmdRows = document.querySelectorAll('.command-row');
                 let cmdMsg = "**New Bot Request [2/3]: Commands** 🤖\n\n";
                 
                 for (let i = 0; i < cmdRows.length; i++) {
                     const row = cmdRows[i];
-                    const inputs = row.querySelectorAll('input, select');
-                    // Indices depend on layout, but let's grab by context for safety
                     const name = row.querySelector('input[placeholder="/name"]').value;
                     const who = row.querySelector('input[placeholder*="Everyone"]').value;
                     const desc = row.querySelector('input[placeholder*="What does it"]').value;
@@ -642,7 +775,6 @@
                     if(cat === 'Custom') cat = row.querySelector('input[placeholder="Enter Category Name"]').value;
                     const cool = row.querySelector('input[placeholder="0"]').value;
                     
-                    // Custom Fields
                     let customTxt = "";
                     const customDivs = row.querySelectorAll('[id^="cmd-custom"] > div');
                     customDivs.forEach(div => {
@@ -662,8 +794,7 @@
                 }
                 if(cmdRows.length > 0) await sendWebhook(webhookURL, cmdMsg);
 
-
-                // 3. Process Features
+                // 3. Features
                 const featRows = document.querySelectorAll('.feature-row');
                 let featMsg = "**New Bot Request [3/3]: Features** ✨\n\n";
 
@@ -673,7 +804,6 @@
                     const config = row.querySelector('input[placeholder*="Needs Channel"]').value;
                     const logic = row.querySelector('textarea').value;
 
-                    // Custom Fields
                     let customTxt = "";
                     const customDivs = row.querySelectorAll('[id^="feat-custom"] > div');
                     customDivs.forEach(div => {
@@ -693,9 +823,22 @@
                 }
                 if(featRows.length > 0) await sendWebhook(webhookURL, featMsg);
 
-                // Success
-                document.getElementById('successModal').classList.remove('hidden');
-                document.getElementById('successModal').classList.add('flex');
+                // Populate Success Screen with IDs
+                const idContainer = document.getElementById('generatedIds');
+                idContainer.innerHTML = `
+                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Order ID:</span> <span class="text-white">${orderId}</span></div>
+                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Bluv ID:</span> <span class="text-white">${bluvId}</span></div>
+                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Unit ID:</span> <span class="text-white">${unitId}</span></div>
+                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Auth ID:</span> <span class="text-white">${authId}</span></div>
+                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Trace ID:</span> <span class="text-white">${traceId}</span></div>
+                `;
+
+                // Show Success Page
+                document.querySelector('main').style.display = 'none';
+                document.querySelector('header').style.display = 'none';
+                document.getElementById('successScreen').classList.remove('hidden');
+                document.getElementById('successScreen').classList.add('flex');
+                window.scrollTo(0,0);
 
             } catch (err) {
                 console.error(err);
@@ -713,7 +856,6 @@
                 body: JSON.stringify({ content: content })
             });
             if (!response.ok) throw new Error("Webhook Error");
-            // Rate limit safety delay
             await new Promise(r => setTimeout(r, 500)); 
         }
     </script>
