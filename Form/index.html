@@ -37,6 +37,7 @@
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
                         'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         float: {
@@ -74,18 +75,27 @@
             background-color: rgba(28, 25, 23, 0.5);
             border: 1px solid #44403c;
             color: #fff;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .input-casual:focus {
             outline: none;
             border-color: #d4b483;
-            background-color: rgba(28, 25, 23, 0.8);
+            background-color: rgba(28, 25, 23, 0.9);
             box-shadow: 0 0 15px rgba(212, 180, 131, 0.1);
+            transform: scale(1.01);
         }
         
         .input-error {
             border-color: #ef4444 !important;
             box-shadow: 0 0 10px rgba(239, 68, 68, 0.2) !important;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
         
         .error-msg {
@@ -93,6 +103,7 @@
             font-size: 0.75rem;
             margin-top: 0.25rem;
             display: none;
+            font-weight: 500;
         }
         .input-error + .error-msg {
             display: block;
@@ -150,26 +161,27 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-50 glass-panel border-b-0 mb-8">
-        <div class="max-w-6xl mx-auto px-6 h-24 flex flex-col md:flex-row items-center justify-between">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2 text-xs font-mono text-earth-400 mb-1">
-                    <a href="https://bluv-developer.github.io/Bluv" target="_blank" class="hover:text-tan-accent transition-colors">Bluv Development</a>
-                    <i class="fas fa-chevron-right text-[10px]"></i>
-                    <a href="https://bluv-developer.github.io/Bots/" target="_blank" class="hover:text-tan-accent transition-colors">Discord Bots</a>
-                    <i class="fas fa-chevron-right text-[10px]"></i>
-                    <span class="text-white">Form</span>
-                </div>
-                <div class="flex items-center gap-3">
-                    <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Bots" class="h-10 w-auto object-contain">
+        <div class="max-w-6xl mx-auto px-6 h-28 flex flex-col md:flex-row items-center justify-between">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <img src="https://ik.imagekit.io/tycncf0zq0/Bluv%20Bots.png?updatedAt=1765122635616" alt="Bluv Bots" class="h-14 w-auto object-contain">
+                <div class="flex flex-col border-l border-earth-600 pl-4 h-10 justify-center">
+                    <div class="flex items-center gap-2 text-[10px] font-mono text-earth-400 tracking-tight">
+                        <a href="https://bluv-developer.github.io/Bluv" target="_blank" class="hover:text-tan-accent transition-colors">Bluv Development</a>
+                        <i class="fas fa-chevron-right text-[8px]"></i>
+                        <a href="https://bluv-developer.github.io/Bots/" target="_blank" class="hover:text-tan-accent transition-colors">Discord Bots</a>
+                        <i class="fas fa-chevron-right text-[8px]"></i>
+                        <span class="text-tan-accent">Form</span>
+                    </div>
+                    <span class="text-xl font-bold text-white tracking-wide">Bots Form</span>
                 </div>
             </div>
             
-            <div class="flex items-center gap-4 mt-2 md:mt-0">
-                <a href="https://discord.gg/KmHfjDm2WA" target="_blank" class="text-xs bg-earth-800 hover:bg-[#5865F2] hover:text-white px-3 py-1.5 rounded-lg border border-earth-700 transition-all">
-                    <i class="fab fa-discord mr-1"></i> Join Discord
+            <div class="flex items-center gap-4 mt-3 md:mt-0 w-full md:w-auto justify-end">
+                <a href="https://discord.gg/KmHfjDm2WA" target="_blank" class="text-xs bg-[#5865F2]/10 hover:bg-[#5865F2] hover:text-white text-[#5865F2] px-4 py-2 rounded-lg border border-[#5865F2]/30 transition-all font-bold">
+                    <i class="fab fa-discord mr-1"></i> Community
                 </a>
-                <div class="text-sm font-mono text-earth-400 bg-earth-800/50 px-4 py-2 rounded-lg border border-earth-700">
-                    Step <span id="step-indicator" class="text-white font-bold text-lg">1</span> of 4
+                <div class="text-sm font-mono text-earth-400 bg-earth-800/50 px-4 py-2 rounded-lg border border-earth-700 animate-pulse-slow">
+                    Step <span id="step-indicator" class="text-tan-accent font-bold text-lg">1</span> / 4
                 </div>
             </div>
         </div>
@@ -181,29 +193,37 @@
             
             <!-- STEP 1: BASICS -->
             <div id="step-1" class="step-panel active">
-                <div class="glass-panel rounded-2xl p-10">
+                <div class="glass-panel rounded-3xl p-8 md:p-12 transition-all">
                     <div class="mb-10 border-b border-earth-700 pb-4">
                         <h1 class="text-4xl font-light text-white mb-2">The Basics</h1>
-                        <p class="text-earth-400">Please fill out all fields below to proceed.</p>
+                        <p class="text-earth-400">Essential information to get us started.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="space-y-6">
-                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Your Info</h3>
+                            <h3 class="text-xs font-bold text-tan-accent uppercase tracking-widest flex items-center gap-2">
+                                <i class="fas fa-user-circle"></i> Your Info
+                            </h3>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Discord Username <span class="text-red-500">*</span></label>
-                                <input type="text" name="client_discord" required class="input-casual w-full p-4 rounded-xl" placeholder="Username#0000">
+                                <input type="text" name="client_discord" required class="input-casual w-full p-4 rounded-xl font-mono" placeholder="Username#0000">
                                 <p class="error-msg">This field is required.</p>
                             </div>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Discord ID <span class="text-red-500">*</span></label>
-                                <input type="text" name="client_id" required class="input-casual w-full p-4 rounded-xl" placeholder="123456789...">
+                                <input type="text" name="client_id" required class="input-casual w-full p-4 rounded-xl font-mono" placeholder="123456789...">
                                 <p class="error-msg">This field is required.</p>
+                            </div>
+                             <div>
+                                <label class="block text-xs text-earth-400 mb-2">Timezone (Optional)</label>
+                                <input type="text" name="client_timezone" class="input-casual w-full p-4 rounded-xl font-mono" placeholder="e.g. EST, GMT+1">
                             </div>
                         </div>
 
                         <div class="space-y-6">
-                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest">Server Info</h3>
+                            <h3 class="text-xs font-bold text-tan-accent uppercase tracking-widest flex items-center gap-2">
+                                <i class="fas fa-server"></i> Server Info
+                            </h3>
                             <div>
                                 <label class="block text-xs text-earth-400 mb-2">Server Name <span class="text-red-500">*</span></label>
                                 <input type="text" name="server_name" required class="input-casual w-full p-4 rounded-xl" placeholder="My Awesome Server">
@@ -217,7 +237,9 @@
                         </div>
 
                         <div class="md:col-span-2 mt-4 pt-6 border-t border-earth-700/50">
-                            <h3 class="text-sm font-bold text-tan-accent uppercase tracking-widest mb-6">Bot Identity</h3>
+                            <h3 class="text-xs font-bold text-tan-accent uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <i class="fas fa-robot"></i> Bot Identity
+                            </h3>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
                                     <label class="block text-xs text-earth-400 mb-2">Bot Name <span class="text-red-500">*</span></label>
@@ -246,7 +268,7 @@
                             </div>
                             
                             <!-- Enhanced Color Picker -->
-                            <div class="mt-6 p-6 bg-earth-800/30 rounded-xl border border-earth-700">
+                            <div class="mt-6 p-6 bg-earth-800/30 rounded-xl border border-earth-700 transition-colors hover:border-tan-accent/30">
                                 <label class="block text-xs text-earth-400 mb-2">Bot Color Theme <span class="text-red-500">*</span></label>
                                 <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
                                     <div class="relative w-full md:w-1/2">
@@ -259,9 +281,9 @@
                                             <option value="#22c55e" data-color="#22c55e">Success Green</option>
                                             <option value="custom" data-color="transparent">Custom Color...</option>
                                         </select>
-                                        <div id="colorPreview" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full border border-earth-500 bg-blue-500 shadow-lg"></div>
+                                        <div id="colorPreview" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full border border-earth-500 bg-blue-500 shadow-lg transition-all duration-300"></div>
                                     </div>
-                                    <div class="w-full md:w-1/2 hidden" id="customColorContainer">
+                                    <div class="w-full md:w-1/2 hidden animate-fade-in" id="customColorContainer">
                                         <input type="text" id="customColorInput" name="custom_theme_color" class="input-casual w-full p-4 rounded-xl" placeholder="e.g. #FF0000 or Red">
                                         <div id="colorValidationMsg" class="color-status"></div>
                                     </div>
@@ -284,19 +306,19 @@
 
             <!-- STEP 2: COMMANDS -->
             <div id="step-2" class="step-panel">
-                <div class="glass-panel rounded-2xl p-10">
-                    <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
+                <div class="glass-panel rounded-3xl p-8 md:p-12">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-earth-700 pb-6 gap-4">
                         <div>
                             <h1 class="text-4xl font-light text-white mb-2">Commands</h1>
-                            <p class="text-earth-400">Add at least 1 command. Be specific!</p>
+                            <p class="text-earth-400">Define your bot's functionality. Be specific!</p>
                         </div>
-                        <button type="button" onclick="addCommandRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
-                            <i class="fas fa-plus mr-1"></i> Add Command
+                        <button type="button" onclick="addCommandRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Add Command
                         </button>
                     </div>
 
                     <!-- In-page Error Container -->
-                    <div id="cmd-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3">
+                    <div id="cmd-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3 animate-pulse">
                         <i class="fas fa-exclamation-circle text-lg"></i>
                         <span>Please add at least 1 command before proceeding.</span>
                     </div>
@@ -316,7 +338,7 @@
                     </div>
                     <div class="flex gap-4">
                         <button type="button" onclick="changeStep(1)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
-                        <button type="button" onclick="validateAndNext(2)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50">
+                        <button type="button" onclick="validateAndNext(2)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50 transform hover:-translate-y-1">
                             Next Step <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -325,19 +347,19 @@
 
             <!-- STEP 3: FEATURES -->
             <div id="step-3" class="step-panel">
-                <div class="glass-panel rounded-2xl p-10">
-                    <div class="flex justify-between items-end mb-8 border-b border-earth-700 pb-6">
+                <div class="glass-panel rounded-3xl p-8 md:p-12">
+                    <div class="flex flex-col md:flex-row justify-between items-end mb-8 border-b border-earth-700 pb-6 gap-4">
                         <div>
                             <h1 class="text-4xl font-light text-white mb-2">Features</h1>
-                            <p class="text-earth-400">Add at least 3 passive systems (Welcomer, Logs, etc.)</p>
+                            <p class="text-earth-400">Passive systems (Welcomer, Logging, Auto-mod).</p>
                         </div>
-                        <button type="button" onclick="addFeatureRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md">
-                            <i class="fas fa-plus mr-1"></i> Add Feature
+                        <button type="button" onclick="addFeatureRow()" class="text-xs bg-earth-800 border border-earth-600 hover:border-tan-accent text-earth-300 hover:text-white px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2">
+                            <i class="fas fa-plus"></i> Add Feature
                         </button>
                     </div>
 
                     <!-- In-page Error Container -->
-                    <div id="feat-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3">
+                    <div id="feat-error-banner" class="hidden mb-6 p-4 bg-red-900/40 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3 animate-pulse">
                         <i class="fas fa-exclamation-circle text-lg"></i>
                         <span>Please add at least 3 features before proceeding.</span>
                     </div>
@@ -357,7 +379,7 @@
                     </div>
                     <div class="flex gap-4">
                         <button type="button" onclick="changeStep(2)" class="text-earth-400 hover:text-white px-8 py-4 font-medium transition-colors">Back</button>
-                        <button type="button" onclick="validateAndNext(3)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50">
+                        <button type="button" onclick="validateAndNext(3)" class="bg-tan-accent hover:bg-white text-earth-900 px-10 py-4 rounded-xl font-bold transition-all shadow-lg hover:shadow-tan-accent/50 transform hover:-translate-y-1">
                             Next Step <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                     </div>
@@ -366,10 +388,10 @@
 
             <!-- STEP 4: TECH STACK -->
             <div id="step-4" class="step-panel">
-                <div class="glass-panel rounded-2xl p-10">
+                <div class="glass-panel rounded-3xl p-8 md:p-12">
                     <div class="mb-10 border-b border-earth-700 pb-4">
                         <h1 class="text-4xl font-light text-white mb-2">Tech Info</h1>
-                        <p class="text-earth-400">Final details.</p>
+                        <p class="text-earth-400">Final details & hosting infrastructure.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -390,9 +412,13 @@
                                 <i class="fas fa-server absolute right-4 top-4 text-earth-500"></i>
                             </div>
                         </div>
+                         <div class="space-y-4">
+                            <label class="block text-xs font-bold text-tan-accent uppercase tracking-widest">Est. User Count (Optional)</label>
+                            <input type="text" name="user_count" class="input-casual w-full p-4 rounded-xl" placeholder="e.g. 500 members">
+                        </div>
                     </div>
 
-                    <div class="p-6 bg-earth-900/50 rounded-xl border border-earth-700 mb-8">
+                    <div class="p-6 bg-earth-900/50 rounded-xl border border-earth-700 mb-8 hover:border-tan-accent/30 transition-colors">
                         <div class="flex items-start gap-4">
                             <i class="fas fa-shield-alt text-2xl text-tan-accent mt-1"></i>
                             <div>
@@ -429,21 +455,26 @@
     </main>
     
     <!-- Footer Links -->
-    <footer class="fixed bottom-0 w-full bg-earth-900/90 backdrop-blur border-t border-earth-700 z-40 py-2">
-        <div class="max-w-6xl mx-auto px-6 flex justify-center md:justify-end gap-6 text-xs font-mono text-earth-500">
-             <a href="https://bluv-developer.github.io/Bots/Form" class="hover:text-tan-accent">Current Form</a>
-             <a href="https://bluv-developer.github.io/Bots/" class="hover:text-tan-accent">All Bots</a>
-             <a href="https://bluv-developer.github.io/Bluv" class="hover:text-tan-accent">Main Site</a>
+    <footer class="fixed bottom-0 w-full bg-earth-900/95 backdrop-blur-lg border-t border-earth-700 z-40 py-3">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-earth-500">
+             <div class="flex gap-6">
+                 <a href="https://bluv-developer.github.io/Bots/Form" class="hover:text-tan-accent transition-colors">Current Form</a>
+                 <a href="https://bluv-developer.github.io/Bots/" class="hover:text-tan-accent transition-colors">All Bots</a>
+                 <a href="https://bluv-developer.github.io/Bluv" class="hover:text-tan-accent transition-colors">Main Site</a>
+             </div>
+             <div>
+                 &copy; 2025 Bluv Development
+             </div>
         </div>
     </footer>
 
     <!-- Full Page Success Screen -->
-    <div id="successScreen" class="fixed inset-0 z-[200] hidden bg-earth-900 flex-col items-center justify-center p-6 overflow-y-auto">
-        <div class="max-w-3xl w-full bg-earth-800/50 border border-tan-accent/20 p-8 md:p-12 rounded-3xl shadow-2xl relative">
+    <div id="successScreen" class="fixed inset-0 z-[200] hidden bg-earth-900 flex-col items-center justify-start md:justify-center p-6 overflow-y-auto">
+        <div class="max-w-4xl w-full bg-earth-800/50 border border-tan-accent/20 p-8 md:p-12 rounded-3xl shadow-2xl relative mt-10 md:mt-0 mb-20">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-tan-accent via-earth-500 to-tan-accent opacity-50 rounded-t-3xl"></div>
             
             <div class="text-center mb-8">
-                <div class="w-20 h-20 bg-tan-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-tan-accent/30">
+                <div class="w-20 h-20 bg-tan-accent/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-tan-accent/30 animate-float">
                     <i class="fas fa-check text-4xl text-tan-accent"></i>
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-4">Submission Successful!</h1>
@@ -463,8 +494,8 @@
                         Bluv or one of his official bots will contact you soon via Discord.
                     </p>
                     <div class="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                        <p class="text-xs text-red-300 font-bold">
-                            <i class="fas fa-shield-alt mr-1"></i> SECURITY NOTE:
+                        <p class="text-xs text-red-300 font-bold flex items-center gap-2">
+                            <i class="fas fa-shield-alt"></i> SECURITY NOTE:
                         </p>
                         <p class="text-[10px] text-red-200 mt-1">
                             Only official bots from <a href="https://discord.gg/KmHfjDm2WA" class="underline hover:text-white">The Official Discord Community</a> will contact you. Verify IDs before trusting DM's.
@@ -475,7 +506,7 @@
 
             <div class="bg-black/30 p-6 rounded-xl border border-earth-700 font-mono text-xs text-earth-400 mb-8">
                 <p class="mb-4 text-tan-accent uppercase tracking-widest font-bold">Reference IDs (Save These)</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2" id="generatedIds">
+                <div class="grid grid-cols-1 gap-y-2" id="generatedIds" style="word-break: break-all;">
                     <!-- IDs injected here -->
                 </div>
             </div>
@@ -513,7 +544,7 @@
                 preview.style.backgroundColor = 'transparent';
                 customInput.required = true;
                 customInput.focus();
-                validateCustomColor(); // Run check immediately
+                validateCustomColor(); 
             } else {
                 container.classList.add('hidden');
                 preview.style.backgroundColor = selectedValue;
@@ -522,24 +553,22 @@
             }
         }
 
-        // Live Custom Color Validation
         customInput.addEventListener('input', validateCustomColor);
 
         function validateCustomColor() {
             const val = customInput.value.trim();
-            // Check if valid using Option styling trick
             const s = new Option().style;
             s.color = val;
             
             if (s.color !== '') {
                 preview.style.backgroundColor = val;
                 validationMsg.textContent = "VALID COLOR";
-                validationMsg.style.color = "#22c55e"; // Green
+                validationMsg.style.color = "#22c55e"; 
                 customInput.classList.remove('input-error');
             } else {
                 preview.style.backgroundColor = 'transparent';
                 validationMsg.textContent = "INVALID COLOR";
-                validationMsg.style.color = "#ef4444"; // Red
+                validationMsg.style.color = "#ef4444"; 
             }
         }
         
@@ -560,7 +589,7 @@
         function addCustomField(containerId) {
             const container = document.getElementById(containerId);
             const div = document.createElement('div');
-            div.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-black/20 p-4 rounded-lg border border-earth-600/50';
+            div.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-black/20 p-4 rounded-lg border border-earth-600/50 animate-fade-in';
             div.innerHTML = `
                 <input type="text" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="Your Question (e.g. Which channel?)">
                 <input type="text" class="input-casual w-full p-3 rounded-lg text-sm" placeholder="Your Answer">
@@ -585,13 +614,11 @@
             let valid = true;
 
             inputs.forEach(input => {
-                // Check visible required inputs
                 if (input.offsetParent !== null && !input.checkValidity()) { 
                     input.classList.add('input-error');
                     valid = false;
                     input.addEventListener('input', () => input.classList.remove('input-error'), { once: true });
                 }
-                // Custom color specific check
                 if (input.id === 'customColorInput' && !input.classList.contains('hidden')) {
                     const s = new Option().style;
                     s.color = input.value;
@@ -602,7 +629,7 @@
                 }
             });
 
-            if (!valid) return; // Stop if basic fields invalid
+            if (!valid) return;
 
             // Logic Validation
             if (current === 2) {
@@ -757,7 +784,9 @@
             identityMsg += `**Bot:** ${fd.get('bot_name')} | Prefix: \`${fd.get('bot_prefix')}\` | Status: ${fd.get('bot_status')}\n`;
             identityMsg += `**Theme:** ${colorSelection}\n`;
             identityMsg += `**Tech:** Python (discord.py) | Hosting: BDH\n`;
-            identityMsg += `**Notes:** ${fd.get('notes')}`;
+            identityMsg += `**Notes:** ${fd.get('notes')}\n`;
+            if(fd.get('client_timezone')) identityMsg += `**Timezone:** ${fd.get('client_timezone')}\n`;
+            if(fd.get('user_count')) identityMsg += `**Est Users:** ${fd.get('user_count')}`;
 
             try {
                 await sendWebhook(webhookURL, identityMsg);
@@ -826,11 +855,11 @@
                 // Populate Success Screen with IDs
                 const idContainer = document.getElementById('generatedIds');
                 idContainer.innerHTML = `
-                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Order ID:</span> <span class="text-white">${orderId}</span></div>
-                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Bluv ID:</span> <span class="text-white">${bluvId}</span></div>
-                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Unit ID:</span> <span class="text-white">${unitId}</span></div>
-                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Auth ID:</span> <span class="text-white">${authId}</span></div>
-                    <div class="flex justify-between border-b border-earth-700 pb-1"><span>Trace ID:</span> <span class="text-white">${traceId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Order ID:</span> <span class="text-white font-bold">${orderId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Bluv ID:</span> <span class="text-white font-bold">${bluvId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Unit ID:</span> <span class="text-white font-bold">${unitId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between border-b border-earth-700 pb-2 mb-2"><span class="text-earth-400">Auth ID:</span> <span class="text-white font-bold">${authId}</span></div>
+                    <div class="flex flex-col md:flex-row md:justify-between pb-2"><span class="text-earth-400">Trace ID:</span> <span class="text-white font-bold">${traceId}</span></div>
                 `;
 
                 // Show Success Page
